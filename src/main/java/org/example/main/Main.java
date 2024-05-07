@@ -23,9 +23,6 @@ public class Main {
         CommitRetriever commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/bookkeeper");
         List<Ticket> bookkeeperTickets = bookkeeperRetriever.getTickets();
 
-        System.out.println("sonar cloud");
-
     }
-    //collegamento con sonar cloud first shot
 
 }
