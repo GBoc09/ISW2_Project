@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class TicketUtils {
+    private TicketUtils() {}
     public static void printTickets(@NotNull ArrayList<Ticket> tickets) {
         for(Ticket ticket: tickets) {
             if(ticket.getInjectedRelease() != null && ticket.getOpeningRelease() != null && ticket.getFixedRelease() != null) {

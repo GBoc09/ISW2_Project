@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Proportion {
+    private Proportion() {}
     public static double computeProportionValue(@NotNull List<Ticket> consistentTickets) {
 
         double proportionSum = 0;
@@ -29,7 +30,8 @@ public class Proportion {
                 tickets.add(ticket);
             }
       }
-        System.out.println(validatedCount);
+        System.out.println("Consistent tickets: " + consistentTickets.size() + " Tickets used for proportion: " + validatedCount);
+        //System.out.println(validatedCount);
         TicketUtils.printTickets(tickets);
         return proportionSum/validatedCount;
     }

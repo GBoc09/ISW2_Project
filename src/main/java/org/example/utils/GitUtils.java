@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,15 +25,16 @@ public class GitUtils {
 
     }
 
+    public static void printCommit(List<RevCommit> commits) {
+        for(RevCommit commit: commits) {
+            System.out.println("Commit: " + commit.getAuthorIdent().getName());
+            System.out.println(commit.getShortMessage());
+        }
+    }
+
     public static LocalDate castToLocalDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         return LocalDate.parse(dateFormatter.format(date));
     }
 
-    public static void printCommit(List<RevCommit> commits){
-        for(RevCommit commit: commits){
-            System.out.println("Commit: " + commit.getAuthorIdent().getName());
-            System.out.println(commit.getFullMessage());
-        }
-    }
 }

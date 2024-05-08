@@ -1,10 +1,10 @@
 package org.example.enums;
 
 public enum ProjectEnums {
-    //ZOOKEEPER,
-    //OPENJPA,
+    ZOOKEEPER,
+    OPENJPA,
     STORM,
-    /*TAJO,
+    //TAJO,
     AVRO,
-    SYNCOPE*/
+    SYNCOPE
 }
