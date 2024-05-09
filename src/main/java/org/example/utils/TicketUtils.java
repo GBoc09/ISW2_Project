@@ -5,10 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class TicketUtils {
     private TicketUtils() {}
-    public static void printTickets(@NotNull ArrayList<Ticket> tickets) {
+    public static void printTickets(@NotNull List<Ticket> tickets) {
         for(Ticket ticket: tickets) {
             if(ticket.getInjectedRelease() != null && ticket.getOpeningRelease() != null && ticket.getFixedRelease() != null) {
                 System.out.println(ticket.getKey() + "," + ticket.getCreationDate() + "," + ticket.getResolutionDate() + "  ->  " +
@@ -18,7 +19,6 @@ public class TicketUtils {
             }
         }
     }
-
     public static void sortTickets(ArrayList<Ticket> tickets) {
         tickets.sort(Comparator.comparing(Ticket::getCreationDate));
     }

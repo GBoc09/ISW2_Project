@@ -25,16 +25,8 @@ public class GitUtils {
 
     }
 
-    public static void printCommit(List<RevCommit> commits) {
-        for(RevCommit commit: commits) {
-            System.out.println("Commit: " + commit.getAuthorIdent().getName());
-            System.out.println(commit.getShortMessage());
-        }
-    }
-
     public static LocalDate castToLocalDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         return LocalDate.parse(dateFormatter.format(date));
     }
-
 }

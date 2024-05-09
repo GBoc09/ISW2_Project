@@ -1,6 +1,7 @@
 package org.example.main;
 
 import org.example.models.Ticket;
+import org.example.retrievers.CommitRetriever;
 import org.example.retrievers.TicketRetriever;
 
 import java.util.List;
@@ -13,9 +14,12 @@ public class Main {
         String resolution = "fixed";
 
         TicketRetriever bookkeeperRetriever = new TicketRetriever("BOOKKEEPER");
-        TicketRetriever openjpaRetriever = new TicketRetriever("OPENJPA");
-
         List<Ticket> bookTickets = bookkeeperRetriever.getTickets();
+        //TicketRetriever openjpaRetriever = new TicketRetriever("OPENJPA");
+        CommitRetriever commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/bookkeeper");
+        //commitRetriever.retrieveChangesFromTickets(bookTickets);
+
+
     }
 
 }
