@@ -8,14 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import static java.time.zone.ZoneRulesProvider.getVersions;
 
 /** With this class we take the version */
 public class VersionRetriever {
@@ -27,8 +25,8 @@ public class VersionRetriever {
     }
 
     public VersionRetriever(String projName) {
-        //Fills the arraylist with releases dates and orders them
-        //Ignores releases with missing dates
+        /*Fills the arraylist with releases dates and orders them
+        Ignores releases with missing dates */
         try {
             getVersions(projName);
         } catch (IOException e) {
@@ -96,7 +94,6 @@ public class VersionRetriever {
         LocalDate date = LocalDate.parse(strDate);
         Version newRelease = new Version(id, name, date);
         releases.add(newRelease);
-        //System.out.println("Version: " + newRelease.getName());
     }
 
 }

@@ -19,7 +19,7 @@ public class TicketUtils {
             }
         }
     }
-    public static void sortTickets(ArrayList<Ticket> tickets) {
+    public static void sortTickets(List<Ticket> tickets) {
         tickets.sort(Comparator.comparing(Ticket::getCreationDate));
     }
 }

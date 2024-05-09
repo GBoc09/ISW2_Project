@@ -15,9 +15,9 @@ public class Proportion {
 
         ArrayList<Ticket> tickets = new ArrayList<>();
         for(Ticket ticket: consistentTickets) {
-            //P = (FV-IV)/(FV-OV)
+            /* P = (FV-IV)/(FV-OV) */
             if(ticket.getInjectedRelease() == null && ticket.getOpeningRelease() == null && ticket.getFixedRelease() == null)
-                continue; //Ignore the ticket that are inconsistent.
+                continue; /* Ignore the ticket that are inconsistent */
             int iv = ticket.getInjectedRelease().getIndex();
             int ov = ticket.getOpeningRelease().getIndex();
             int fv = ticket.getFixedRelease().getIndex();
@@ -31,7 +31,6 @@ public class Proportion {
             }
       }
         System.out.println("Consistent tickets: " + consistentTickets.size() + " Tickets used for proportion: " + validatedCount);
-        //System.out.println(validatedCount);
         TicketUtils.printTickets(tickets);
         return proportionSum/validatedCount;
     }

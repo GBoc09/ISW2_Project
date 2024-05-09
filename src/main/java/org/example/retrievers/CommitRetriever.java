@@ -15,7 +15,6 @@ import org.example.models.Version;
 import org.example.utils.GitUtils;
 import org.example.utils.RegularExpression;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +32,8 @@ public class CommitRetriever {
      * It's iterates through a list of RevCommit objects and checks if the full message of each commit contain a certain
      * key related to a ticket. To check if the message contains a specific key it appears to be using a regular expression */
     private List<RevCommit> retrieveAssociatedCommits(@NotNull List<RevCommit> commits, Ticket ticket)  {
-        ArrayList<RevCommit> associatedCommit = new ArrayList<>(); // to store the associated commit with a ticket
+        ArrayList<RevCommit> associatedCommit = new ArrayList<>(); /** to store the associated commit with a ticket */
         for(RevCommit commit: commits) {
-            //if (commit.getFullMessage().contains(ticket.getKey())) {
             if(RegularExpression.matchRegex(commit.getFullMessage(), ticket.getKey())) {
                 associatedCommit.add(commit);
             }
@@ -68,7 +66,7 @@ public class CommitRetriever {
         return commits;
     }
     /** Associate the tickets with the commits that reference them. Moreover, discard the tickets that don't have any commits.*/
-    public List<Ticket> associateTicketAndCommit(VersionRetriever versionRetriever, CommitRetriever commitRetriever, ArrayList<Ticket> tickets) {
+    public List<Ticket> associateTicketAndCommit(VersionRetriever versionRetriever, CommitRetriever commitRetriever, List<Ticket> tickets) {
         try {
             List<RevCommit> commits = commitRetriever.retrieveCommit(versionRetriever);
             for (Ticket ticket : tickets) {
@@ -111,8 +109,8 @@ public class CommitRetriever {
             ObjectId newTree = git.getRepository().resolve(commit.getName() + "^{tree}");
             newTreeIter.reset(reader, newTree);
 
-            DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE); // to format the differences between the old and the new tree
-            // DisableOutputStream.INSTANCE to suppress the output of the formatter, indicating that we're only interested in scanning the differences programmatically.
+            DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE); /** to format the differences between the old and the new tree
+            DisableOutputStream.INSTANCE to suppress the output of the formatter, indicating that we're only interested in scanning the differences programmatically.*/
             diffFormatter.setRepository(git.getRepository());
             List<DiffEntry> entries = diffFormatter.scan(oldTreeIter, newTreeIter);
 

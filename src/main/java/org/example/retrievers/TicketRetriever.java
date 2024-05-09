@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /** With this class we take the tickets from JIRA */
 
@@ -55,12 +54,11 @@ public class TicketRetriever {
         try {
             versionRetriever = new VersionRetriever(projName);
             tickets = retrieveBugTickets(projName, issueType, status, resolution);
-            //TicketUtils.printTickets(tickets);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    // Set OV and FV of the ticket. IV will retrieve from AV takes from Jira or takes applying proportion.
+    /** Set OV and FV of the ticket. IV will retrieve from AV takes from Jira or takes applying proportion. */
     private void setReleaseInfoInTicket(@NotNull Ticket ticket) {
         Version openingRelease = retrieveNextRelease(ticket.getCreationDate());
         Version fixRelease = retrieveNextRelease(ticket.getResolutionDate());
@@ -85,9 +83,9 @@ public class TicketRetriever {
         int total;
         ArrayList<Ticket> consistentTickets = new ArrayList<>();
         ArrayList<Ticket> inconsistentTickets = new ArrayList<>();
-        //Get JSON API for closed bugs w/ AV in the project
+        /* Get JSON API for closed bugs w/ AV in the project */
         do {
-            //Only gets a max of 1000 at a time, so must do this multiple times if bugs >1000
+            /* Only gets a max of 1000 at a time, so must do this multiple times if bugs >1000 */
             j = i + 1000;
             String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22"
                     + projName + "%22AND%22issueType%22=%22" + issueType + "%22AND(%22status%22=%22" + status + "%22OR"
@@ -97,7 +95,7 @@ public class TicketRetriever {
             JSONArray issues = json.getJSONArray("issues");
             total = json.getInt("total");
             for (; i < total && i < j; i++) {
-                //Iterate through each bug
+                /** Iterate through each bug */
                 String key = issues.getJSONObject(i%1000).get("key").toString();
                 String resolutionDate = issues.getJSONObject(i%1000).getJSONObject(FIELDS).get("resolutiondate").toString();
                 String creationDate = issues.getJSONObject(i%1000).getJSONObject(FIELDS).get("created").toString();
@@ -108,10 +106,10 @@ public class TicketRetriever {
                 addTicket(ticket, consistentTickets, inconsistentTickets); //Add the ticket to the consistent or inconsistent list, based on the consistency check
             }
         } while (i < total);
-        adjustInconsistentTickets(inconsistentTickets, consistentTickets); //Adjust the inconsistency tickets using proportion for missing IV
-        if(!coldStart) adjustInconsistentTickets(inconsistentTickets, consistentTickets); //Adjust the inconsistency tickets using proportion for missing IV, when you are not using cold start
+        adjustInconsistentTickets(inconsistentTickets, consistentTickets); /*Adjust the inconsistency tickets using proportion for missing IV */
+        if(!coldStart) adjustInconsistentTickets(inconsistentTickets, consistentTickets); /* Adjust the inconsistency tickets using proportion for missing IV, when you are not using cold start */
         CommitRetriever commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase());
-        discardInvalidTicket(consistentTickets); //Discard the tickets that aren't consistent yet.
+        discardInvalidTicket(consistentTickets); /* Discard the tickets that aren't consistent yet.*/
         TicketUtils.printTickets(consistentTickets);
         System.out.println("\nTickets estratti prima di togliere commit da " + projName + ": " + consistentTickets.size() + "\n");
 
@@ -123,13 +121,12 @@ public class TicketRetriever {
 
     }
     /** This method helps to ensure that only valid tickets remain in the list after filtering out invalid ones based on
-     * release indices
-     *
+     * release indices.
      * Discard tickets that have OV > FV or that have IV=OV */
     private void discardInvalidTicket(ArrayList<Ticket> tickets) {
-        tickets.removeIf(ticket -> ticket.getOpeningRelease().getIndex() > ticket.getFixedRelease().getIndex() ||   //Discard if OV > FV
-                ticket.getInjectedRelease().getIndex() >= ticket.getOpeningRelease().getIndex() || //Discard if IV >= OV
-                (ticket.getOpeningRelease() == null || ticket.getFixedRelease() == null)); //Discard if there is a new version after the creation or the fix of the ticket
+        tickets.removeIf(ticket -> ticket.getOpeningRelease().getIndex() > ticket.getFixedRelease().getIndex() ||   /* Discard if OV > FV */
+                ticket.getInjectedRelease().getIndex() >= ticket.getOpeningRelease().getIndex() || /*Discard if IV >= OV */
+                (ticket.getOpeningRelease() == null || ticket.getFixedRelease() == null)); /* Discard if there is a new version after the creation or the fix of the ticket */
     }
 
 
@@ -144,11 +141,11 @@ public class TicketRetriever {
         }
         System.out.println("Proportion value: " + proportionValue);
         for(Ticket ticket: inconsistentTickets) {
-            adjustTicket(ticket, proportionValue); //Use proportion to compute the IV
+            adjustTicket(ticket, proportionValue); /* Use proportion to compute the IV */
             if(isNotConsistent(ticket)) {
-                throw new RuntimeException(); //Create a new exception for the case when the ticket is not adjusted correctly
+                throw new RuntimeException(); /* Create a new exception for the case when the ticket is not adjusted correctly */
             }
-            consistentTickets.add(ticket); //Add the adjusted ticket to the consistent list
+            consistentTickets.add(ticket); /* Add the adjusted ticket to the consistent list */
         }
 
     }
@@ -156,7 +153,7 @@ public class TicketRetriever {
     /** This method computers a new injected version for the ticket based on the proportion value and updates the ticket
      * accordingly. */
     private void adjustTicket(Ticket ticket, double proportionValue) {
-        //Assign the new injected version for the inconsistent ticket as max(0, FV-(FV-OV)*P)
+        /* Assign the new injected version for the inconsistent ticket as max(0, FV-(FV-OV)*P)*/
         Version ov = ticket.getOpeningRelease();
         Version fv = ticket.getFixedRelease();
         int newIndex;
@@ -171,7 +168,7 @@ public class TicketRetriever {
         }
         ticket.setInjectedRelease(versionRetriever.projVersions.get(newIndex));
     }
-    //Check that IV <= OV <= FV and that IV = AV[0]. If one condition is false, the ticket will add to inconsistency tickets
+    /** Check that IV <= OV <= FV and that IV = AV[0]. If one condition is false, the ticket will add to inconsistency tickets */
     private static void addTicket(Ticket ticket, ArrayList<Ticket> consistentTickets, ArrayList<Ticket> inconsistentTickets) {
         if(isNotConsistent(ticket)) {
             inconsistentTickets.add(ticket);
