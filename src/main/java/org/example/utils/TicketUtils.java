@@ -1,5 +1,6 @@
 package org.example.utils;
 
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.example.models.Ticket;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,5 +22,14 @@ public class TicketUtils {
     }
     public static void sortTickets(List<Ticket> tickets) {
         tickets.sort(Comparator.comparing(Ticket::getCreationDate));
+    }
+    public static List<RevCommit> getAssociatedCommit(List<Ticket> tickets) {
+        List<RevCommit> commits = new ArrayList<>();
+
+        for(Ticket t: tickets) {
+            commits.addAll(t.getAssociatedCommits());
+        }
+
+        return commits;
     }
 }

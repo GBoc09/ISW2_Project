@@ -20,8 +20,9 @@ import java.util.List;
 /** With this class we take the tickets from JIRA */
 
 public class TicketRetriever {
-    public static final String FIELDS = "fields";
+    static final String FIELDS = "fields";
     VersionRetriever versionRetriever;
+    CommitRetriever commitRetriever;
     List<Ticket> tickets;
     boolean coldStart = false;
 
@@ -108,15 +109,8 @@ public class TicketRetriever {
         } while (i < total);
         adjustInconsistentTickets(inconsistentTickets, consistentTickets); /*Adjust the inconsistency tickets using proportion for missing IV */
         if(!coldStart) adjustInconsistentTickets(inconsistentTickets, consistentTickets); /* Adjust the inconsistency tickets using proportion for missing IV, when you are not using cold start */
-        CommitRetriever commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase());
         discardInvalidTicket(consistentTickets); /* Discard the tickets that aren't consistent yet.*/
-        TicketUtils.printTickets(consistentTickets);
-        System.out.println("\nTickets estratti prima di togliere commit da " + projName + ": " + consistentTickets.size() + "\n");
-
-        System.out.println("\n------------------------------------------------------------------------------\n");
-
-        TicketUtils.sortTickets(consistentTickets);
-
+        commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
         return commitRetriever.associateTicketAndCommit(versionRetriever, commitRetriever, consistentTickets);
 
     }
@@ -188,6 +182,13 @@ public class TicketRetriever {
 
     public List<Ticket> getTickets() {
         return tickets;
+    }
+    public CommitRetriever getCommitRetriever() {
+        return commitRetriever;
+    }
+
+    public VersionRetriever getVersionRetriever() {
+        return versionRetriever;
     }
 }
 
