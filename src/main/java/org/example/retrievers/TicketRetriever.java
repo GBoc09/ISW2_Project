@@ -5,20 +5,17 @@ import org.example.models.Version;
 import org.example.utils.ColdStart;
 import org.example.utils.JSONUtils;
 import org.example.utils.Proportion;
-import org.example.utils.TicketUtils;
+import org.example.utils.VersionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 /** With this class we take the tickets from JIRA */
-
 public class TicketRetriever {
     static final String FIELDS = "fields";
     VersionRetriever versionRetriever;
@@ -26,16 +23,24 @@ public class TicketRetriever {
     List<Ticket> tickets;
     boolean coldStart = false;
 
+    public TicketRetriever(String projName) {
+        init(projName);
+    }
+
+    public TicketRetriever(String projName, boolean coldStart) {
+        this.coldStart = coldStart;
+        init(projName);
+    }
+
     /** This constructor initializes a TicketRetriever object for a specific project, retrieves bug tickets with a certain
      * criteria and prints out information about the retrieved tickets and associated commits. */
-    public TicketRetriever(String projName) {
+    private void init(String projName) {
         String issueType = "Bug";
         String status = "closed";
         String resolution = "fixed";
         try {
             versionRetriever = new VersionRetriever(projName);
             tickets = retrieveBugTickets(projName, issueType, status, resolution);
-            TicketUtils.printTickets(tickets);
             System.out.println("Tickets estratti da " + projName + ": " + tickets.size());
             int count = 0;
             for(Ticket ticket: tickets) {
@@ -46,36 +51,13 @@ public class TicketRetriever {
             throw new RuntimeException(e);
         }
     }
-
-    public TicketRetriever(String projName, boolean coldStart){
-    String issueType = "Bug";
-    String status = "closed";
-    String resolution = "fixed";
-    this.coldStart = coldStart;
-        try {
-            versionRetriever = new VersionRetriever(projName);
-            tickets = retrieveBugTickets(projName, issueType, status, resolution);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
     /** Set OV and FV of the ticket. IV will retrieve from AV takes from Jira or takes applying proportion. */
-    private void setReleaseInfoInTicket(@NotNull Ticket ticket) {
-        Version openingRelease = retrieveNextRelease(ticket.getCreationDate());
-        Version fixRelease = retrieveNextRelease(ticket.getResolutionDate());
+    private void setReleaseInTicket(@NotNull Ticket ticket) {
+        Version openingRelease = VersionUtils.retrieveNextRelease(versionRetriever, ticket.getCreationDate());
+        Version fixRelease = VersionUtils.retrieveNextRelease(versionRetriever, ticket.getResolutionDate());
 
         ticket.setOpeningRelease(openingRelease);
         ticket.setFixedRelease(fixRelease);
-    }
-
-    private @Nullable Version retrieveNextRelease(LocalDate localDate) {
-        for(Version versionInfo : versionRetriever.projVersions) {
-            LocalDate releaseDate = versionInfo.getDate();
-            if(!releaseDate.isBefore(localDate)) {
-                return versionInfo;
-            }
-        }
-        return null;
     }
 
     public  @NotNull List<Ticket> retrieveBugTickets(String projName, String issueType, String status, String resolution) throws IOException, JSONException {
@@ -102,8 +84,12 @@ public class TicketRetriever {
                 String creationDate = issues.getJSONObject(i%1000).getJSONObject(FIELDS).get("created").toString();
                 List<Version> releases = versionRetriever.getAffectedVersions(issues.getJSONObject(i%1000).getJSONObject(FIELDS).getJSONArray("versions"));
                 Ticket ticket = new Ticket(creationDate, resolutionDate, key, releases, versionRetriever);
-                setReleaseInfoInTicket(ticket);
-                if(ticket.getInjectedRelease() != null && (ticket.getInjectedRelease().getIndex() > ticket.getOpeningRelease().getIndex())) continue;
+                setReleaseInTicket(ticket);
+                //Discard tickets that are incorrect or that are after the last release
+                if (ticket.getOpeningRelease() == null ||
+                        (ticket.getInjectedRelease() != null &&
+                                (ticket.getInjectedRelease().getIndex() > ticket.getOpeningRelease().getIndex())))
+                    continue;
                 addTicket(ticket, consistentTickets, inconsistentTickets); //Add the ticket to the consistent or inconsistent list, based on the consistency check
             }
         } while (i < total);
@@ -111,7 +97,7 @@ public class TicketRetriever {
         if(!coldStart) adjustInconsistentTickets(inconsistentTickets, consistentTickets); /* Adjust the inconsistency tickets using proportion for missing IV, when you are not using cold start */
         discardInvalidTicket(consistentTickets); /* Discard the tickets that aren't consistent yet.*/
         commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
-        return commitRetriever.associateTicketAndCommit(versionRetriever, commitRetriever, consistentTickets);
+        return commitRetriever.associateTicketAndCommit(consistentTickets);
 
     }
     /** This method helps to ensure that only valid tickets remain in the list after filtering out invalid ones based on

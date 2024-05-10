@@ -12,27 +12,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-
-        TicketRetriever bookkeeperRetriever = new TicketRetriever("BOOKKEEPER");
-        List<Ticket> bookTickets = bookkeeperRetriever.getTickets();
-        //TicketRetriever openjpaRetriever = new TicketRetriever("OPENJPA");
-        CommitRetriever bookCommitRetriever = bookkeeperRetriever.getCommitRetriever();
-        //commitRetriever.retrieveChangesFromTickets(bookTickets);
-        try {
-            List<ReleaseCommits> releaseCommitsList = bookCommitRetriever.getReleaseCommits(bookkeeperRetriever.getVersionRetriever(), TicketUtils.getAssociatedCommit(bookTickets));
-            printReleaseCommit(releaseCommitsList);
-        } catch (GitAPIException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        new ExecutionFlow("BOOKKEEPER");
+        new ExecutionFlow("OPENJPA");
 
     }
-
-    private static void printReleaseCommit(List<ReleaseCommits> releaseCommitsList) {
-        for(ReleaseCommits rc: releaseCommitsList) {
-            System.out.println(rc.getJavaClasses().keySet());
-        }
-    }
-
-
-
 }

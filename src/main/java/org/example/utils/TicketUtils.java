@@ -20,10 +20,10 @@ public class TicketUtils {
             }
         }
     }
-    public static void sortTickets(List<Ticket> tickets) {
+    public static void sortTickets(@NotNull List<Ticket> tickets) {
         tickets.sort(Comparator.comparing(Ticket::getCreationDate));
     }
-    public static List<RevCommit> getAssociatedCommit(List<Ticket> tickets) {
+    public static @NotNull List<RevCommit> getAssociatedCommit(List<Ticket> tickets) {
         List<RevCommit> commits = new ArrayList<>();
 
         for(Ticket t: tickets) {

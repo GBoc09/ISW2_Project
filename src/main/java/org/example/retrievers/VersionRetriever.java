@@ -2,6 +2,7 @@ package org.example.retrievers;
 
 import org.example.models.Version;
 import org.example.utils.JSONUtils;
+import org.example.utils.VersionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -29,6 +30,7 @@ public class VersionRetriever {
         Ignores releases with missing dates */
         try {
             getVersions(projName);
+            VersionUtils.printVersion(projVersions);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

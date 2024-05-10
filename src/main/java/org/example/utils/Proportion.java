@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Proportion {
-    private Proportion() {}
     public static double computeProportionValue(@NotNull List<Ticket> consistentTickets) {
 
         double proportionSum = 0;

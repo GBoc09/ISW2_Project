@@ -17,7 +17,7 @@ import java.util.List;
 
 
 public class GitUtils {
-    private GitUtils() {}
+
     public static ReleaseCommits getCommitsOfRelease(List<RevCommit> commitsList, Version release, LocalDate firstDate) {
 
         List<RevCommit> matchingCommits = new ArrayList<>();
@@ -27,7 +27,7 @@ public class GitUtils {
             LocalDate commitDate = commit.getCommitterIdent().getWhen().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
             //if firstDate < commitDate <= lastDate then add the commit in matchingCommits list
-            if(commitDate.isAfter(firstDate) && (commitDate.isBefore(lastDate) || commitDate.equals(lastDate))) {
+            if(commitDate.isAfter(firstDate) && !commitDate.isAfter(lastDate)) {
                 matchingCommits.add(commit);
             }
 
