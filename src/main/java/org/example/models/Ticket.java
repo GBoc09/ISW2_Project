@@ -16,15 +16,16 @@ import java.util.List;
  * an affectedVersion that are all the version between the injected version included and the fixed version  */
 
 public class Ticket {
-    private String key;
-    private LocalDate creationDate;
-    private LocalDate resolutionDate;
-    private List<Version> affectedReleases;
-    private Version openingRelease;
-    private Version fixedRelease;
-    private Version injectedRelease;
-    private VersionRetriever versionRetriever;
-    private List<RevCommit> associatedCommits;
+    String key;
+    LocalDate creationDate;
+    LocalDate resolutionDate;
+    List<Version> affectedReleases;
+    Version openingRelease;
+    Version fixedRelease;
+    Version injectedRelease;
+    VersionRetriever versionRetriever;
+    List<RevCommit> associatedCommits;
+    RevCommit lastCommit;
 
     public Ticket(@NotNull String creationDate, @NotNull String resolutionDate, String key, List<Version> affectedReleases, @NotNull VersionRetriever versionRetriever) {
         this.creationDate = LocalDate.parse(creationDate.substring(0, 10));
@@ -48,8 +49,19 @@ public class Ticket {
 
     public void setAssociatedCommits(List<RevCommit> associatedCommits) {
         this.associatedCommits = associatedCommits;
+        if(associatedCommits.isEmpty()) return;
+
+        RevCommit com = associatedCommits.get(0);
+        for(RevCommit commit: associatedCommits){
+            if(commit.getCommitterIdent().getWhen().after(com.getCommitterIdent().getWhen())) com = commit;
+        }
+
+        this.lastCommit = com;
     }
 
+    public RevCommit getLastCommit() {
+        return lastCommit;
+    }
     public LocalDate getResolutionDate() {
         return resolutionDate;
     }

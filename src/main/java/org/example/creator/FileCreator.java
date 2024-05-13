@@ -4,6 +4,7 @@ import org.example.enums.CsvNamesEnum;
 import org.example.models.JavaClass;
 import org.example.models.ReleaseCommits;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -23,10 +24,28 @@ public class FileCreator {
     public static void writeOnCsv(String projName, List<ReleaseCommits> rcList, CsvNamesEnum csvEnum, int csvIndex) throws IOException {
 
         String csvNameStr = enumToString(csvEnum, csvIndex);
+        String pathname = projName + csvNameStr + ".csv";
 
-        try(FileWriter fw = new FileWriter(projName + csvNameStr + ".csv")) {
+        File file = new File(pathname);
 
-            fw.write("VERSION_INDEX,JAVA_CLASS,SIZE,IS_BUGGY");
+        if(file.exists()) {
+            if(!file.delete()) {
+                throw new IOException(); //Exception: file deletion impossible
+            }
+        }
+        try(FileWriter fw = new FileWriter(pathname)) {
+            fw.write("VERSION," +
+                    "JAVA_CLASS," +
+                    "SIZE," +
+                    "LOC_ADDED," +
+                    "MAX_LOC_ADDED," +
+                    "AVG_LOC_ADDED," +
+                    "CHURN," +
+                    "MAX_CHURN," +
+                    "AVG_CHURN," +
+                    "FIXED_DEFECTS," +
+                    "NUMBER_OF_COMMITS," +
+                    "IS_BUGGY");
 
             int count;
 
@@ -38,24 +57,21 @@ public class FileCreator {
                     fw.write(rc.getRelease().getIndex() + ",");
                     fw.write(javaClass.getName() + ",");
                     fw.write(javaClass.getMetrics().getSize() + ",");
+                    fw.write(javaClass.getMetrics().getLocAdded() + ",");
+                    fw.write(javaClass.getMetrics().getMaxLocAdded() + ",");
+                    fw.write(javaClass.getMetrics().getAvgLocAdded() + ",");
+                    fw.write(javaClass.getMetrics().getChurn() + ",");
+                    fw.write(javaClass.getMetrics().getMaxChurn() + ",");
+                    fw.write(javaClass.getMetrics().getAvgChurn() + ",");
+                    fw.write(javaClass.getMetrics().getFixedDefects() + ",");
+                    fw.write(javaClass.getCommits().size() + ",");
                     fw.write(javaClass.getMetrics().isBuggy());
-                    /*cell1.setCellValue(javaClass.getRelease().getId());
-                    cell2.setCellValue(javaClass.getSize());
-                    cell3.setCellValue(javaClass.getNr());
-                    cell4.setCellValue(javaClass.getnAuth());
-                    cell5.setCellValue(javaClass.getLocAdded());
-                    cell6.setCellValue(javaClass.getMaxLocAdded());
-                    cell7.setCellValue(javaClass.getAvgLocAdded());
-                    cell8.setCellValue(javaClass.getChurn());
-                    cell9.setCellValue(javaClass.getMaxChurn());
-                    cell10.setCellValue(javaClass.getAvgChurn());*/
-
                     if(javaClass.getMetrics().isBuggyness()) {
                         count++;
                     }
                 }
 
-                System.out.println("Numero di classi buggy for " + rc.getRelease().getName() + ": " + count);
+               rc.setBuggyClasses(count);
             }
         }
     }

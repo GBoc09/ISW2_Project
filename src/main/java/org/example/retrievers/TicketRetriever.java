@@ -88,8 +88,9 @@ public class TicketRetriever {
                 //Discard tickets that are incorrect or that are after the last release
                 if (ticket.getOpeningRelease() == null ||
                         (ticket.getInjectedRelease() != null &&
-                                (ticket.getInjectedRelease().getIndex() > ticket.getOpeningRelease().getIndex())))
-                    continue;
+                                (ticket.getInjectedRelease().getIndex() > ticket.getOpeningRelease().getIndex())) ||
+                        ticket.getFixedRelease() == null)
+                continue;
                 addTicket(ticket, consistentTickets, inconsistentTickets); //Add the ticket to the consistent or inconsistent list, based on the consistency check
             }
         } while (i < total);
@@ -148,6 +149,7 @@ public class TicketRetriever {
         }
         ticket.setInjectedRelease(versionRetriever.projVersions.get(newIndex));
     }
+
     /** Check that IV <= OV <= FV and that IV = AV[0]. If one condition is false, the ticket will add to inconsistency tickets */
     private static void addTicket(Ticket ticket, ArrayList<Ticket> consistentTickets, ArrayList<Ticket> inconsistentTickets) {
         if(isNotConsistent(ticket)) {
