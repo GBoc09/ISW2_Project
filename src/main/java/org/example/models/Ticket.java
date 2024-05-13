@@ -34,7 +34,6 @@ public class Ticket {
         setVersionRetriever(versionRetriever);
         setInjectedRelease(affectedReleases);
     }
-
     public void setVersionRetriever(VersionRetriever versionRetriever) {
         if(versionRetriever == null) {
             throw new RuntimeException();
@@ -89,7 +88,7 @@ public class Ticket {
         this.injectedRelease = release;
         computeAffectedRelease();
     }
-    private void setInjectedRelease(List<Version> affectedReleases) {
+    private void setInjectedRelease(@NotNull List<Version> affectedReleases) {
         if(!affectedReleases.isEmpty()) {
             this.injectedRelease = affectedReleases.get(0);
             computeAffectedRelease();

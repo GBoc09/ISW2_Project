@@ -20,15 +20,8 @@ public class TicketUtils {
             }
         }
     }
-    public static List<Ticket> getTicketsUntilRelease(List<Ticket> tickets, int versionBound) {
-        List<Ticket> ticketList = new ArrayList<>();
-        for(Ticket ticket: tickets) {
-            if(ticket.getOpeningRelease().getIndex() <= versionBound) {
-                ticketList.add(ticket);
-            }
-        }
-
-        return ticketList;
+    public static void sortTickets(@NotNull List<Ticket> tickets) {
+        tickets.sort(Comparator.comparing(Ticket::getCreationDate));
     }
     public static @NotNull List<RevCommit> getAssociatedCommit(List<Ticket> tickets) {
         List<RevCommit> commits = new ArrayList<>();

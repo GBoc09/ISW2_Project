@@ -3,7 +3,7 @@ package org.example.retrievers;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.example.models.ChangedJavaClass;
 import org.example.models.JavaClass;
-import org.example.models.ReleaseInfo;
+import org.example.models.ReleaseCommits;
 import org.example.models.Ticket;
 import org.example.utils.GitUtils;
 import org.example.utils.JavaClassUtils;
@@ -11,85 +11,46 @@ import org.example.utils.VersionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MetricsRetriever {
-    private MetricsRetriever(){}
+    private MetricsRetriever() {}
 
-    public static void computeBuggyness(List<ReleaseInfo> releaseInfoList, @NotNull List<Ticket> tickets, CommitRetriever commitRetriever, VersionRetriever versionRetriever) {
-        initializeBuggyness(releaseInfoList);
-        for (Ticket ticket : tickets) {
-            computeBuggyness(releaseInfoList, commitRetriever, versionRetriever, ticket);
-
-        }
-    }
-    private static void computeFixedDefects(List<ReleaseInfo> releaseInfoList, @NotNull List<Ticket> tickets, CommitRetriever commitRetriever, VersionRetriever versionRetriever) {
+    public static void computeBuggynessAndFixedDefects(List<ReleaseCommits> releaseCommitsList, @NotNull List<Ticket> tickets, CommitRetriever commitRetriever, VersionRetriever versionRetriever) {
         for(Ticket ticket: tickets){
-            //For each ticket, update the number of fixed defects of classes present in the last commit of the ticket (the fixed commit).
-            JavaClassUtils.updateNumberOfFixedDefects(versionRetriever, ticket.getAssociatedCommits(), releaseInfoList, commitRetriever);
-        }
-    }
-    private static void computeBuggyness(List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever, VersionRetriever versionRetriever, @NotNull Ticket ticket) {
-        for (RevCommit commit : ticket.getAssociatedCommits()) {
-            //For each commit associated to a ticket, set all classes touched in commit as buggy in all the affected versions of the ticket.
-            ReleaseInfo releaseInfo = VersionUtils.retrieveCommitRelease(
-                    versionRetriever,
-                    GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen()),
-                    releaseInfoList);
+            for (RevCommit commit : ticket.getAssociatedCommits()) {
+                ReleaseCommits releaseCommits = VersionUtils.retrieveCommitRelease(
+                        versionRetriever,
+                        GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen()),
+                        releaseCommitsList);
 
-            if (releaseInfo != null) {
-                List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(commit);
+                if (releaseCommits != null) {
+                    List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(commit);
 
-                for (ChangedJavaClass javaClass : classChangedList) {
-                    JavaClassUtils.updateJavaBuggyness(javaClass, releaseInfoList, ticket.getAffectedReleases());
+                    for (ChangedJavaClass javaClass : classChangedList) {
+                        JavaClassUtils.updateJavaBuggyness(javaClass, releaseCommitsList, ticket.getAffectedReleases());
+                    }
                 }
             }
+            //For each ticket, update the number of fixed defects of classes present in the last commit of the ticket (the fixed commit).
+            List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(ticket.getLastCommit());
+            JavaClassUtils.updateNumberOfFixedDefects(versionRetriever, ticket.getLastCommit(), classChangedList, releaseCommitsList);
         }
     }
 
-    private static void initializeBuggyness(List<ReleaseInfo> releaseInfoList) {
-        for(ReleaseInfo releaseInfo: releaseInfoList) {
-            for(JavaClass javaClass: releaseInfo.getJavaClasses()) {
-                javaClass.getMetrics().setClassBuggyness(false);
-            }
-        }
-    }
-
-    public static void computeMetrics(List<ReleaseInfo> releaseInfoList, @NotNull List<Ticket> tickets, CommitRetriever commitRetriever, VersionRetriever versionRetriever) {
+    public static void computeMetrics(List<ReleaseCommits> releaseCommitsList, CommitRetriever commitRetriever) {
         //Add the size metric in all the classes of the release.
-        addSizeLabel(releaseInfoList);
+        addSizeLabel(releaseCommitsList);
         try {
-            computeBuggyness(releaseInfoList, tickets, commitRetriever, versionRetriever);
-            computeFixedDefects(releaseInfoList, tickets, commitRetriever, versionRetriever);
-            computeLocData(releaseInfoList, commitRetriever);
-            computeNAuth(releaseInfoList);
+            computeLocData(releaseCommitsList, commitRetriever);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    private static void computeNAuth(@NotNull List<ReleaseInfo> releaseInfoList) {
-
-        for(ReleaseInfo rc: releaseInfoList){
-            for (JavaClass javaClass : rc.getJavaClasses()) {
-                List<String> classAuthors = new ArrayList<>();
-
-                for (RevCommit commit : javaClass.getCommits()) {
-                    if (!classAuthors.contains(commit.getAuthorIdent().getName())) {
-                        classAuthors.add(commit.getAuthorIdent().getName());
-                    }
-
-                }
-                javaClass.getMetrics().setnAuth(classAuthors.size());
-
-            }
-        }
-    }
-
-    private static void computeLocData(@NotNull List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever) throws IOException {
-        for(ReleaseInfo rc: releaseInfoList) {
+    private static void computeLocData(@NotNull List<ReleaseCommits> releaseCommitsList, CommitRetriever commitRetriever) throws IOException {
+        for(ReleaseCommits rc: releaseCommitsList) {
             for (JavaClass javaClass : rc.getJavaClasses()) {
                 commitRetriever.computeAddedAndDeletedLinesList(javaClass);
                 computeLocAndChurnMetrics(javaClass);
@@ -128,15 +89,16 @@ public class MetricsRetriever {
                 maxDeletedLOC = currentDeletedLOC;
             }
         }
-        int numberOfRevision = javaClass.getCommits().size();
+
+        //If a class has 0 revisions, its AvgLocAdded and AvgChurn are 0 (see initialization above).
         if(!javaClass.getMetrics().getAddedLinesList().isEmpty()) {
-            avgLOC = 1.0*sumLOC/numberOfRevision;
+            avgDeletedLOC = 1.0*sumOfTheDeletedLOC/javaClass.getMetrics().getDeletedLinesList().size();
         }
         if(!javaClass.getMetrics().getAddedLinesList().isEmpty() || !javaClass.getMetrics().getDeletedLinesList().isEmpty()) {
-            avgChurn = 1.0*churn/numberOfRevision;
+            avgChurn = 1.0*churn/(javaClass.getMetrics().getAddedLinesList().size() + javaClass.getMetrics().getDeletedLinesList().size());
         }
         if(!javaClass.getMetrics().getDeletedLinesList().isEmpty()) {
-            avgDeletedLOC = 1.0*sumOfTheDeletedLOC/numberOfRevision;
+            avgLOC = 1.0*sumOfTheDeletedLOC/javaClass.getMetrics().getAddedLinesList().size();
         }
 
         javaClass.getMetrics().setLocAdded(sumLOC);
@@ -152,11 +114,9 @@ public class MetricsRetriever {
 
     }
 
+    public static void addSizeLabel(@NotNull List<ReleaseCommits> releaseCommitsList) {
 
-
-    public static void addSizeLabel(@NotNull List<ReleaseInfo> releaseInfoList) {
-
-        for(ReleaseInfo rc: releaseInfoList) {
+        for(ReleaseCommits rc: releaseCommitsList) {
             for(JavaClass javaClass: rc.getJavaClasses()) {
                 String[] lines = javaClass.getContent().split("\r\n|\r|\n");
                 javaClass.getMetrics().setSize(lines.length);

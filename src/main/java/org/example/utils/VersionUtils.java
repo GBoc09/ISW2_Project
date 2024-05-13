@@ -1,6 +1,6 @@
 package org.example.utils;
 
-import org.example.models.ReleaseInfo;
+import org.example.models.ReleaseCommits;
 import org.example.models.Version;
 import org.example.retrievers.VersionRetriever;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +13,8 @@ public class VersionUtils {
     private VersionUtils() {}
     public static void printVersion(List<Version> versionList) {
         for(Version version: versionList) {
-            System.out.println("Version: " +
-                    + version.getIndex() + ", "
+            System.out.println("Version: "
+                    + version.getId() + ", "
                     + version.getName() + ", "
                     + version.getDate());
         }
@@ -29,10 +29,10 @@ public class VersionUtils {
         }
         return null;
     }
-    public static @Nullable ReleaseInfo retrieveCommitRelease(VersionRetriever versionRetriever, LocalDate date, @NotNull List<ReleaseInfo> rcList) {
+    public static @Nullable ReleaseCommits retrieveCommitRelease(VersionRetriever versionRetriever, LocalDate date, @NotNull List<ReleaseCommits> rcList) {
         Version version = retrieveNextRelease(versionRetriever, date);
 
-        for(ReleaseInfo rc: rcList) {
+        for(ReleaseCommits rc: rcList) {
             if(rc.getRelease() == version) return rc;
         }
 

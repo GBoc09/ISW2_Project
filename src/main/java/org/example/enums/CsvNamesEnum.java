@@ -1,8 +1,8 @@
 package org.example.enums;
 
-public enum FilenamesEnum {
+public enum CsvNamesEnum {
     TRAINING,
     TESTING,
-    METRICS,
+    BUGGY,
     CURRENT
 }

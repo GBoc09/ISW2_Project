@@ -12,12 +12,9 @@ public class Metrics {
     private final List<Integer> addedLinesOfCodeList = new ArrayList<>();
     private final List<Integer> deletedLinesOfCodeList = new ArrayList<>();
     private int fixedDefects = 0;
-    private int nAuth;
 
-    public Metrics() {}
-
-    public void setClassBuggyness(boolean b) {
-        this.buggyness = b;
+    public void setClassBuggyness() {
+        this.buggyness = true;
     }
 
     public boolean isBuggyness() {
@@ -62,7 +59,7 @@ public class Metrics {
     }
 
     public void setAvgLocDeleted(double avgLocAdded) {
-        this.addedLOCMetrics.avgLoc = avgLocAdded;
+        this.deletedLOCMetrics.avgLoc = avgLocAdded;
     }
 
     public double getAvgLocDeleted() {
@@ -124,16 +121,6 @@ public class Metrics {
     public void updateFixedDefects() {
         this.fixedDefects = fixedDefects + 1;
     }
-
-    public void setnAuth(int size) {
-        this.nAuth = size;
-    }
-
-    public int getnAuth() {
-        return nAuth;
-    }
-
-
 
     private static class LOCMetrics {
         private int maxLoc;

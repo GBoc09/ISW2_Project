@@ -1,4 +1,5 @@
 package org.example.utils;
+
 import java.util.regex.Pattern;
 
 public class RegularExpression {

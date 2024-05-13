@@ -8,14 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColdStart {
-    private ColdStart() {}
-
     /**When the number of valid tickets used for compute the proportion value are less than 5, use the tickets of other
      * project.*/
-    public static List<Ticket> getTicketForColdStart(ProjectEnums project) {
-        TicketRetriever retriever = new TicketRetriever(project.toString(), true);
+    public static List<Ticket> coldStart() {
+        List<Ticket> consistentTickets = new ArrayList<>();
+        for(ProjectEnums project: ProjectEnums.values()) {
+            TicketRetriever retriever = new TicketRetriever(project.toString(), true);
+            consistentTickets.addAll(retriever.getTickets());
+        }
 
-        return new ArrayList<>(retriever.getTickets());
+        return consistentTickets;
     }
 
 }

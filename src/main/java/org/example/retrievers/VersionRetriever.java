@@ -30,26 +30,26 @@ public class VersionRetriever {
         Ignores releases with missing dates */
         try {
             getVersions(projName);
-            //VersionUtils.printVersion(projVersions);
+            VersionUtils.printVersion(projVersions);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-        private void getVersions(String projName) throws IOException {
-            String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
-            JSONObject json = JSONUtils.readJsonFromUrl(url);
-            JSONArray versions = json.getJSONArray("versions");
-            this.projVersions = createVersionArray(versions);
-            sortRelease(this.projVersions);
-            setIndex(this.projVersions);
+    private void getVersions(String projName) throws IOException {
+        String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
+        JSONObject json = JSONUtils.readJsonFromUrl(url);
+        JSONArray versions = json.getJSONArray("versions");
+        this.projVersions = createVersionArray(versions);
+        sortRelease(this.projVersions);
+        setIndex(this.projVersions);
+    }
+    private void setIndex(@NotNull List<Version> versions) {
+        int i = 0;
+        for(Version versionInfo : versions) {
+            versionInfo.setIndex(i);
+            i++;
         }
-        private void setIndex(@NotNull List<Version> versions) {
-            int i = 0;
-            for(Version versionInfo : versions) {
-                versionInfo.setIndex(i);
-                i++;
-            }
-        }
+    }
 
     public List<Version> getAffectedVersions(@NotNull JSONArray versions) {
         String id;
@@ -58,7 +58,7 @@ public class VersionRetriever {
             if(versions.getJSONObject(i).has(RELEASE_DATE) && versions.getJSONObject(i).has("id")) {
                 id = versions.getJSONObject(i).get("id").toString();
                 Version v = searchVersion(id);
-                if(v == null) continue; //TODO Create a new exception or ignore the case with v == null
+                if(v == null) throw new RuntimeException(); //TODO Create a new exception or ignore the case with v == null
                 affectedVersions.add(v);
             }
         }
@@ -87,17 +87,6 @@ public class VersionRetriever {
             }
         }
         return versionList;
-    }
-    public void deleteVersionWithoutCommits() {
-        projVersions.removeIf(Version::isCommitListEmpty);
-
-        projVersions.sort(Comparator.comparing(Version::getDate));
-        int i = 0;
-        for (Version v : projVersions) {
-            v.setIndex(i);
-            i++;
-        }
-
     }
     private void sortRelease(@NotNull List<Version> releases) {
         releases.sort(Comparator.comparing(Version::getDate));
