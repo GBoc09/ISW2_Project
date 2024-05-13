@@ -34,9 +34,7 @@ public class Ticket {
         setVersionRetriever(versionRetriever);
         setInjectedRelease(affectedReleases);
     }
-    public VersionRetriever getVersionRetriever() {
-        return versionRetriever;
-    }
+
     public void setVersionRetriever(VersionRetriever versionRetriever) {
         if(versionRetriever == null) {
             throw new RuntimeException();
@@ -47,7 +45,7 @@ public class Ticket {
         return creationDate;
     }
 
-    public void setAssociatedCommits(List<RevCommit> associatedCommits) {
+    public void setAssociatedCommits(@NotNull List<RevCommit> associatedCommits) {
         this.associatedCommits = associatedCommits;
         if(associatedCommits.isEmpty()) return;
 

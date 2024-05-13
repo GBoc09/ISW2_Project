@@ -30,7 +30,7 @@ public class VersionRetriever {
         Ignores releases with missing dates */
         try {
             getVersions(projName);
-            VersionUtils.printVersion(projVersions);
+            //VersionUtils.printVersion(projVersions);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,7 +58,7 @@ public class VersionRetriever {
             if(versions.getJSONObject(i).has(RELEASE_DATE) && versions.getJSONObject(i).has("id")) {
                 id = versions.getJSONObject(i).get("id").toString();
                 Version v = searchVersion(id);
-                if(v == null) throw new RuntimeException(); //TODO Create a new exception or ignore the case with v == null
+                if(v == null) continue; //TODO Create a new exception or ignore the case with v == null
                 affectedVersions.add(v);
             }
         }
@@ -86,8 +86,18 @@ public class VersionRetriever {
                 addRelease(versions.getJSONObject(i).get(RELEASE_DATE).toString(), name, id, versionList);
             }
         }
-        System.out.println("Versions: " + versionList.size());
         return versionList;
+    }
+    public void deleteVersionWithoutCommits() {
+        projVersions.removeIf(Version::isCommitListEmpty);
+
+        projVersions.sort(Comparator.comparing(Version::getDate));
+        int i = 0;
+        for (Version v : projVersions) {
+            v.setIndex(i);
+            i++;
+        }
+
     }
     private void sortRelease(@NotNull List<Version> releases) {
         releases.sort(Comparator.comparing(Version::getDate));

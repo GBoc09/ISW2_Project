@@ -3,10 +3,11 @@ package org.example.utils;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.example.models.ChangedJavaClass;
 import org.example.models.JavaClass;
-import org.example.models.ReleaseCommits;
+import org.example.models.ReleaseInfo;
 import org.example.models.Version;
 import org.example.retrievers.CommitRetriever;
 import org.example.retrievers.VersionRetriever;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,12 @@ import java.util.Objects;
 public class JavaClassUtils {
     private void JavaClassUtil() {}
 
-    public static void updateJavaBuggyness(ChangedJavaClass className, List<ReleaseCommits> releaseCommitsList, List<Version> affectedReleases, RevCommit commit) {
+    public static void updateJavaBuggyness(ChangedJavaClass className, @NotNull List<ReleaseInfo> releaseInfoList, List<Version> affectedReleases) {
 
-        for(ReleaseCommits rc: releaseCommitsList) { //TODO Tra le affected release potrebbero esserci release senza commit
+        for(ReleaseInfo rc: releaseInfoList) {
             if(affectedReleases.contains(rc.getRelease())) { //Get the affected release and update the buggyness of the java class
                 List<JavaClass> javaClasses = rc.getJavaClasses(); //Get the java classes of the release
-                findClassAndSetBuggyness(className, javaClasses, commit);
+                findClassAndSetBuggyness(className, javaClasses);
             }
         }
     }
@@ -30,34 +31,35 @@ public class JavaClassUtils {
      *
      * @param className   the name of the searched class
      * @param javaClasses the list of java classes in the release
-     * @param commit the commit that modified the searched class
      */
-    private static void findClassAndSetBuggyness(ChangedJavaClass className, List<JavaClass> javaClasses, RevCommit commit) {
+    private static void findClassAndSetBuggyness(ChangedJavaClass className, List<JavaClass> javaClasses) {
         for(JavaClass javaClass: javaClasses) {
             if(Objects.equals(javaClass.getName(), className.getJavaClassName())) {
-                javaClass.getMetrics().setClassBuggyness();
+                javaClass.getMetrics().setClassBuggyness(true);
                 return;
             }
         }
     }
 
-    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, RevCommit lastCommit, List<ChangedJavaClass> classChangedList, List<ReleaseCommits> releaseCommitsList) {
-        ReleaseCommits releaseCommits = VersionUtils.retrieveCommitRelease(
-                versionRetriever,
-                GitUtils.castToLocalDate(lastCommit.getCommitterIdent().getWhen()),
-                releaseCommitsList);
+    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, @NotNull List<RevCommit> commits, List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever) {
+        for(RevCommit commit: commits){
+            List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(commit);
+            ReleaseInfo releaseInfo = VersionUtils.retrieveCommitRelease(
+                    versionRetriever,
+                    GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen()),
+                    releaseInfoList);
+            if (releaseInfo != null) {
 
-        if (releaseCommits != null) {
-
-            for (ChangedJavaClass javaClass : classChangedList) {
-                updateFixedDefects(releaseCommits, javaClass.getJavaClassName());
+                for (ChangedJavaClass javaClass : classChangedList) {
+                    updateFixedDefects(releaseInfo, javaClass.getJavaClassName());
+                }
             }
         }
     }
 
-    private static void updateFixedDefects(ReleaseCommits releaseCommits, String className) {
+    private static void updateFixedDefects(@NotNull ReleaseInfo releaseInfo, String className) {
 
-        for(JavaClass javaClass: releaseCommits.getJavaClasses()) {
+        for(JavaClass javaClass: releaseInfo.getJavaClasses()) {
             if(Objects.equals(javaClass.getName(), className)) {
                 javaClass.getMetrics().updateFixedDefects();
 
@@ -66,7 +68,7 @@ public class JavaClassUtils {
         }
     }
 
-    public static void updateJavaClassCommits(CommitRetriever commitRetriever, List<RevCommit> commits, List<JavaClass> javaClasses) {
+    public static void updateJavaClassCommits(CommitRetriever commitRetriever, @NotNull List<RevCommit> commits, List<JavaClass> javaClasses) {
 
         for(RevCommit commit: commits) {
             List<ChangedJavaClass> changedJavaClassList = commitRetriever.retrieveChanges(commit);
@@ -82,7 +84,7 @@ public class JavaClassUtils {
         }
     }
 
-    public static List<ChangedJavaClass> createChangedJavaClass(List<JavaClass> javaClasses) {
+    public static @NotNull List<ChangedJavaClass> createChangedJavaClass(List<JavaClass> javaClasses) {
         List<ChangedJavaClass> changedJavaClassList = new ArrayList<>();
 
         for(JavaClass javaClass: javaClasses) {
