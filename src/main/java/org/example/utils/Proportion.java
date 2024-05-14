@@ -1,9 +1,12 @@
 package org.example.utils;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.example.enums.ProjectEnums;
 import org.example.models.Ticket;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,20 +15,22 @@ public class Proportion {
 
     private Proportion() {}
 
-    public static double computeColdStartProportionValue() {
+    public static double computeColdStartProportionValue() throws GitAPIException, IOException, URISyntaxException {
         if(coldStartProportionValue != -1) return coldStartProportionValue;
 
         List<Double> proportionValueList = new ArrayList<>();
 
         for(ProjectEnums proj: ProjectEnums.values()) {
-            proportionValueList.add(computeProportionValue(ColdStart.getTicketForColdStart(proj)));
+            double p = computeProportionValue(ColdStart.getTicketForColdStart(proj));
+            if(p != 0)
+                proportionValueList.add(p);
         }
 
         coldStartProportionValue = computeMedian(proportionValueList);
         return coldStartProportionValue;
     }
 
-    private static double computeMedian(List<Double> proportionValueList) {
+    private static double computeMedian(@NotNull List<Double> proportionValueList) {
         proportionValueList.sort(Double::compareTo);
         if(proportionValueList.size()%2 != 0) {
             return proportionValueList.get((proportionValueList.size()-1)/2);
@@ -44,7 +49,7 @@ public class Proportion {
         for(Ticket ticket: consistentTickets) {
             //P = (FV-IV)/(FV-OV)
             if(ticket.getInjectedRelease() == null && ticket.getOpeningRelease() == null && ticket.getFixedRelease() == null)
-                throw new RuntimeException(); //create an exception for inconsistency ticket list: there is an inconsistent ticket in the consistent list
+                continue; //Ignore the ticket that are inconsistent.
             int iv = ticket.getInjectedRelease().getIndex();
             int ov = ticket.getOpeningRelease().getIndex();
             int fv = ticket.getFixedRelease().getIndex();
@@ -63,7 +68,7 @@ public class Proportion {
         return proportionSum/validatedCount;
     }
 
-    public static boolean isAValidTicketForProportion(Ticket ticket) {
+    public static boolean isAValidTicketForProportion(@NotNull Ticket ticket) {
         if(ticket.getInjectedRelease() == null || ticket.getOpeningRelease() == null || ticket.getFixedRelease() == null) return false;
 
         int iv = ticket.getInjectedRelease().getIndex();

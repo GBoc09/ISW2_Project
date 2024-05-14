@@ -54,13 +54,9 @@ public class GitUtils {
     }
 
 
-    public static Repository getRepository(String repoPath) {
-        try{
-            FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
-            return repositoryBuilder.setGitDir(new File(repoPath + "/.git")).build();
-        }catch (IOException e){
-            throw new RuntimeException(e);
-        }
+    public static Repository getRepository(String repoPath) throws IOException {
+        FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
+        return repositoryBuilder.setGitDir(new File(repoPath + "/.git")).build();
 
     }
 

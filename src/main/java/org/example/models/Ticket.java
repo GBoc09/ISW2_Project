@@ -34,18 +34,18 @@ public class Ticket {
         setVersionRetriever(versionRetriever);
         setInjectedRelease(affectedReleases);
     }
+
     public void setVersionRetriever(VersionRetriever versionRetriever) {
-        if(versionRetriever == null) {
-            throw new RuntimeException();
-        }
         this.versionRetriever = versionRetriever;
     }
+
     public LocalDate getCreationDate() {
         return creationDate;
     }
 
     public void setAssociatedCommits(@NotNull List<RevCommit> associatedCommits) {
         this.associatedCommits = associatedCommits;
+
         if(associatedCommits.isEmpty()) return;
 
         RevCommit com = associatedCommits.get(0);
@@ -56,38 +56,48 @@ public class Ticket {
         this.lastCommit = com;
     }
 
-    public RevCommit getLastCommit() {
-        return lastCommit;
-    }
     public LocalDate getResolutionDate() {
         return resolutionDate;
     }
+
     public String getKey() {
         return key;
     }
+
     public List<Version> getAffectedReleases() {
         return affectedReleases;
     }
+
     public Version getOpeningRelease() {
         return openingRelease;
     }
+
     public void setOpeningRelease(Version openingRelease) {
         this.openingRelease = openingRelease;
     }
+
     public Version getFixedRelease() {
         return fixedRelease;
     }
+
+    public List<RevCommit> getAssociatedCommits() {
+        return associatedCommits;
+    }
+
     public void setFixedRelease(Version fixedRelease) {
         this.fixedRelease = fixedRelease;
         computeAffectedRelease();
     }
+
     public Version getInjectedRelease() {
         return injectedRelease;
     }
+
     public void setInjectedRelease(Version release) {
         this.injectedRelease = release;
         computeAffectedRelease();
     }
+
     private void setInjectedRelease(@NotNull List<Version> affectedReleases) {
         if(!affectedReleases.isEmpty()) {
             this.injectedRelease = affectedReleases.get(0);
@@ -96,18 +106,18 @@ public class Ticket {
             this.injectedRelease = null;
         }
     }
+
     public void computeAffectedRelease() {
         // Execute the method only if the ticket has fixed and injected release
         if(this.injectedRelease == null || this.fixedRelease == null) return;
+
         List<Version> releases = new ArrayList<>();
-        for (Version versionInfo : versionRetriever.getProjVersions()) {
-            if ((versionInfo.getIndex() >= this.injectedRelease.getIndex()) && (versionInfo.getIndex() < this.fixedRelease.getIndex())) {
-                releases.add(versionInfo);
+        for (Version version : versionRetriever.getProjVersions()) {
+            if ((version.getIndex() >= this.injectedRelease.getIndex()) && (version.getIndex() < this.fixedRelease.getIndex())) {
+                releases.add(version);
             }
         }
+
         this.affectedReleases = releases;
-    }
-    public List<RevCommit> getAssociatedCommits() {
-        return associatedCommits;
     }
 }

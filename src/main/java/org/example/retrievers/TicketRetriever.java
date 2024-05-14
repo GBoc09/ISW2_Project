@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,35 +25,29 @@ public class TicketRetriever {
     List<Ticket> tickets;
     boolean coldStart = false;
 
-    public TicketRetriever(String projName) {
+    public TicketRetriever(String projName) throws GitAPIException, IOException, URISyntaxException {
         init(projName);
-        try {
-            commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
-            commitRetriever.associateCommitAndVersion(versionRetriever.getProjVersions()); //Association of commits and versions and deletion of the version without commits
-            VersionUtils.printVersion(versionRetriever.projVersions);
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
-        }
+        commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
+        commitRetriever.associateCommitAndVersion(versionRetriever.getProjVersions()); //Association of commits and versions and deletion of the version without commits
+
     }
 
-    public TicketRetriever(String projName, boolean coldStart) {
+    public TicketRetriever(String projName, boolean coldStart) throws GitAPIException, IOException, URISyntaxException {
         this.coldStart = coldStart;
         init(projName);
     }
 
     /** This constructor initializes a TicketRetriever object for a specific project, retrieves bug tickets with a certain
      * criteria and prints out information about the retrieved tickets and associated commits. */
-    private void init(String projName) {
+    private void init(String projName) throws GitAPIException, IOException, URISyntaxException {
         String issueType = "Bug";
         String status = "closed";
         String resolution = "fixed";
-        try {
-            versionRetriever = new VersionRetriever(projName);
-            tickets = retrieveBugTickets(projName, issueType, status, resolution);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        versionRetriever = new VersionRetriever(projName);
+        tickets = retrieveBugTickets(projName, issueType, status, resolution);
+
     }
+
     /** Set OV and FV of the ticket. IV will retrieve from AV takes from Jira or takes applying proportion. */
     private void setReleaseInTicket(@NotNull Ticket ticket) {
         Version openingRelease = VersionUtils.retrieveNextRelease(versionRetriever, ticket.getCreationDate());
@@ -62,7 +57,7 @@ public class TicketRetriever {
         ticket.setFixedRelease(fixRelease);
     }
 
-    public  @NotNull List<Ticket> retrieveBugTickets(String projName, String issueType, String status, String resolution) throws IOException, JSONException {
+    public  @NotNull List<Ticket> retrieveBugTickets(String projName, String issueType, String status, String resolution) throws IOException, JSONException, GitAPIException, URISyntaxException {
         int j;
         int i = 0;
         int total;
@@ -120,7 +115,7 @@ public class TicketRetriever {
 
     /** It adjusts inconsistent tickets based on a proportion value and ensures that the adjusted tickets are consistent
      * before adding them to the list of consistent tickets.*/
-    private  void adjustInconsistentTickets(@NotNull List<Ticket> inconsistentTickets, @NotNull List<Ticket> consistentTickets){
+    private  void adjustInconsistentTickets(@NotNull List<Ticket> inconsistentTickets, @NotNull List<Ticket> consistentTickets) throws GitAPIException, IOException, URISyntaxException {
         List<Ticket> ticketForProportion = new ArrayList<>();
         List<Ticket> allTickets = new ArrayList<>();
 
@@ -128,27 +123,24 @@ public class TicketRetriever {
         allTickets.addAll(consistentTickets);
 
         allTickets.sort(Comparator.comparing(Ticket::getResolutionDate));
-        double oldValue = 0;
         for(Ticket ticket: allTickets) {
             double proportionValue;
             if(inconsistentTickets.contains(ticket)) {  //If the ticket is in the inconsistent tickets list, then adjust the ticket using proportion.
                 proportionValue = incrementalProportion(ticketForProportion);
-                /*if (oldValue != proportionValue) System.out.println(proportionValue);
-                oldValue = proportionValue;*/
-                adjustTicket(ticket, proportionValue); //Use proportion to compute the IV
-            } else if(consistentTickets.contains(ticket)) {
-                if(Proportion.isAValidTicketForProportion(ticket)) ticketForProportion.add(ticket);
+                adjustTicket(ticket, proportionValue); //Use proportion to compute the IV.
+            } else if(consistentTickets.contains(ticket) && Proportion.isAValidTicketForProportion(ticket)) {
+                ticketForProportion.add(ticket);
             }
 
             if(isNotConsistent(ticket)) {
-                throw new RuntimeException();
+                continue;
             }
             if(!consistentTickets.contains(ticket))
                 consistentTickets.add(ticket); //Add the adjusted ticket to the consistent list
         }
     }
 
-    private static double incrementalProportion(@NotNull List<Ticket> consistentTickets) {
+    private static double incrementalProportion(@NotNull List<Ticket> consistentTickets) throws GitAPIException, IOException, URISyntaxException {
         double proportionValue;
 
         if(consistentTickets.size() >= 5) {

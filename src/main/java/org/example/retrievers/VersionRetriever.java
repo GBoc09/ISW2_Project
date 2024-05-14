@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,16 +25,12 @@ public class VersionRetriever {
         return projVersions;
     }
 
-    public VersionRetriever(String projName) {
+    public VersionRetriever(String projName) throws IOException, URISyntaxException {
         /*Fills the arraylist with releases dates and orders them
         Ignores releases with missing dates */
-        try {
-            getVersions(projName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        getVersions(projName);
     }
-    private void getVersions(String projName) throws IOException {
+    private void getVersions(String projName) throws IOException, URISyntaxException {
         String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
         JSONObject json = JSONUtils.readJsonFromUrl(url);
         JSONArray versions = json.getJSONArray("versions");
@@ -56,12 +53,14 @@ public class VersionRetriever {
             if(versions.getJSONObject(i).has(RELEASE_DATE) && versions.getJSONObject(i).has("id")) {
                 id = versions.getJSONObject(i).get("id").toString();
                 Version v = searchVersion(id);
-                if(v == null) continue; //TODO Create a new exception or ignore the case with v == null
+                if(v == null) continue;
+
                 affectedVersions.add(v);
             }
         }
         return affectedVersions;
     }
+
     private @Nullable Version searchVersion(String id) {
         for(Version version: this.projVersions) {
             if(Objects.equals(version.getId(), id)) {

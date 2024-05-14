@@ -9,6 +9,7 @@ import org.example.retrievers.CommitRetriever;
 import org.example.retrievers.VersionRetriever;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class JavaClassUtils {
         }
     }
 
-    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, @NotNull List<RevCommit> commits, List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever) {
+    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, @NotNull List<RevCommit> commits, List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever) throws IOException {
         for(RevCommit commit: commits){
             List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(commit);
             ReleaseInfo releaseInfo = VersionUtils.retrieveCommitRelease(
@@ -69,7 +70,7 @@ public class JavaClassUtils {
         }
     }
 
-    public static void updateJavaClassCommits(CommitRetriever commitRetriever, @NotNull List<RevCommit> commits, List<JavaClass> javaClasses) {
+    public static void updateJavaClassCommits(CommitRetriever commitRetriever, @NotNull List<RevCommit> commits, List<JavaClass> javaClasses) throws IOException {
 
         for(RevCommit commit: commits) {
             List<ChangedJavaClass> changedJavaClassList = commitRetriever.retrieveChanges(commit);
