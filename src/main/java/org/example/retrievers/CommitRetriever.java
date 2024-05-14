@@ -6,11 +6,8 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.RawTextComparator;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
@@ -70,11 +67,11 @@ public class CommitRetriever {
         return commits;
     }
     /** Associate the tickets with the commits that reference them. Moreover, discard the tickets that don't have any commits.*/
-    public List<Ticket> associateTicketAndCommit(@NotNull List<Ticket> tickets) {
+    public void associateTicketAndCommit(@NotNull List<Ticket> tickets) {
         try {
             List<RevCommit> commits = this.retrieveCommit();
             for (Ticket ticket : tickets) {
-                List<RevCommit> associatedCommits = new ArrayList<>();
+                List<RevCommit> associatedCommits = this.retrieveAssociatedCommits(commits, ticket);
                 List<RevCommit> consistentCommits = new ArrayList<>();
                 for(RevCommit commit: associatedCommits){
                     LocalDate when = GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen());
@@ -86,19 +83,16 @@ public class CommitRetriever {
                 ticket.setAssociatedCommits(consistentCommits);
             }
             tickets.removeIf(ticket -> ticket.getAssociatedCommits().isEmpty()); //Discard tickets that have no associated commits
-            tickets.removeIf(ticket -> ticket.getAssociatedCommits().isEmpty());
         } catch (GitAPIException e) {
             throw new RuntimeException(e);
         }
-
-        return tickets;
     }
 
-    public List<ReleaseCommits> getReleaseCommits(@NotNull VersionRetriever versionRetriever, List<RevCommit> commits) throws IOException {
-        List<ReleaseCommits> releaseCommits = new ArrayList<>();
+    public List<ReleaseInfo> getReleaseCommits(@NotNull VersionRetriever versionRetriever, List<RevCommit> commits) throws IOException {
+        List<ReleaseInfo> releaseCommits = new ArrayList<>();
         LocalDate lowerBound = LocalDate.of(1900, 1, 1);
         for(Version version : versionRetriever.getProjVersions()) {
-            ReleaseCommits releaseCommit = GitUtils.getCommitsOfRelease(commits, version, lowerBound);
+            ReleaseInfo releaseCommit = GitUtils.getCommitsOfRelease(commits, version, lowerBound);
             if(releaseCommit != null) {
                 List<JavaClass> javaClasses = getClasses(releaseCommit.getLastCommit());
                 releaseCommit.setJavaClasses(javaClasses);
@@ -110,6 +104,22 @@ public class CommitRetriever {
 
         return releaseCommits;
     }
+
+    public void associateCommitAndVersion(List<Version> projVersions) throws GitAPIException {
+        LocalDate lowerBound = LocalDate.of(1900, 1, 1);
+        for(Version version: projVersions) {
+            for(RevCommit commit: retrieveCommit()) {
+                LocalDate commitDate = GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen());
+                if ((commitDate.isBefore(version.getDate()) || commitDate.isEqual(version.getDate())) && commitDate.isAfter(lowerBound)) {
+                    version.addCommitToList(commit);
+                }
+            }
+            lowerBound = version.getDate();
+        }
+        versionRetriever.deleteVersionWithoutCommits();
+    }
+
+
 
     private List<JavaClass> getClasses(@NotNull RevCommit commit) throws IOException {
 
@@ -176,32 +186,6 @@ public class CommitRetriever {
         }
         return changedJavaClassList;
     }
-    public String getContentOfClassByCommit(String className, @NotNull RevCommit commit) throws IOException {
-
-        RevTree tree = commit.getTree();
-        // Tree walk to iterate over all files in the Tree recursively
-
-        TreeWalk treeWalk = new TreeWalk(this.repository);
-
-        treeWalk.addTree(tree);
-
-        treeWalk.setRecursive(true);
-
-        while (treeWalk.next()) {
-            // We are keeping only Java classes that are not involved in tests
-            if (treeWalk.getPathString().equals(className)) {
-                String content = new String(this.repository.open(treeWalk.getObjectId(0)).getBytes(), StandardCharsets.UTF_8);
-                treeWalk.close();
-                return content;
-            }
-        }
-
-        treeWalk.close();
-        // If here it mean no class with name className is present
-        return null;
-    }
-
-
 
     public void computeAddedAndDeletedLinesList(@NotNull JavaClass javaClass) throws IOException {
 

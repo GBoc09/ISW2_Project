@@ -3,7 +3,7 @@ package org.example.utils;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.example.models.ChangedJavaClass;
 import org.example.models.JavaClass;
-import org.example.models.ReleaseCommits;
+import org.example.models.ReleaseInfo;
 import org.example.models.Version;
 import org.example.retrievers.CommitRetriever;
 import org.example.retrievers.VersionRetriever;
@@ -16,9 +16,9 @@ import java.util.Objects;
 public class JavaClassUtils {
     private void JavaClassUtil() {}
 
-    public static void updateJavaBuggyness(ChangedJavaClass className, @NotNull List<ReleaseCommits> releaseCommitsList, List<Version> affectedReleases) {
+    public static void updateJavaBuggyness(ChangedJavaClass className, @NotNull List<ReleaseInfo> releaseInfoList, List<Version> affectedReleases) {
 
-        for(ReleaseCommits rc: releaseCommitsList) {
+        for(ReleaseInfo rc: releaseInfoList) {
             if(affectedReleases.contains(rc.getRelease())) { //Get the affected release and update the buggyness of the java class
                 List<JavaClass> javaClasses = rc.getJavaClasses(); //Get the java classes of the release
                 findClassAndSetBuggyness(className, javaClasses);
@@ -35,29 +35,32 @@ public class JavaClassUtils {
     private static void findClassAndSetBuggyness(ChangedJavaClass className, @NotNull List<JavaClass> javaClasses) {
         for(JavaClass javaClass: javaClasses) {
             if(Objects.equals(javaClass.getName(), className.getJavaClassName())) {
-                javaClass.getMetrics().setClassBuggyness();
+                javaClass.getMetrics().setClassBuggyness(true);
                 return;
             }
         }
     }
 
-    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, @NotNull RevCommit lastCommit, List<ChangedJavaClass> classChangedList, List<ReleaseCommits> releaseCommitsList) {
-        ReleaseCommits releaseCommits = VersionUtils.retrieveCommitRelease(
-                versionRetriever,
-                GitUtils.castToLocalDate(lastCommit.getCommitterIdent().getWhen()),
-                releaseCommitsList);
+    public static void updateNumberOfFixedDefects(VersionRetriever versionRetriever, @NotNull List<RevCommit> commits, List<ReleaseInfo> releaseInfoList, CommitRetriever commitRetriever) {
+        for(RevCommit commit: commits){
+            List<ChangedJavaClass> classChangedList = commitRetriever.retrieveChanges(commit);
+            ReleaseInfo releaseInfo = VersionUtils.retrieveCommitRelease(
+                    versionRetriever,
+                    GitUtils.castToLocalDate(commit.getCommitterIdent().getWhen()),
+                    releaseInfoList);
 
-        if (releaseCommits != null) {
+            if (releaseInfo != null) {
 
-            for (ChangedJavaClass javaClass : classChangedList) {
-                updateFixedDefects(releaseCommits, javaClass.getJavaClassName());
+                for (ChangedJavaClass javaClass : classChangedList) {
+                    updateFixedDefects(releaseInfo, javaClass.getJavaClassName());
+                }
             }
         }
     }
 
-    private static void updateFixedDefects(@NotNull ReleaseCommits releaseCommits, String className) {
+    private static void updateFixedDefects(@NotNull ReleaseInfo releaseInfo, String className) {
 
-        for(JavaClass javaClass: releaseCommits.getJavaClasses()) {
+        for(JavaClass javaClass: releaseInfo.getJavaClasses()) {
             if(Objects.equals(javaClass.getName(), className)) {
                 javaClass.getMetrics().updateFixedDefects();
 

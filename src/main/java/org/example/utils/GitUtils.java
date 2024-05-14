@@ -3,7 +3,7 @@ package org.example.utils;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.example.models.ReleaseCommits;
+import org.example.models.ReleaseInfo;
 import org.example.models.Version;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class GitUtils {
 
-    public static ReleaseCommits getCommitsOfRelease(List<RevCommit> commitsList, Version release, LocalDate firstDate) {
+    public static ReleaseInfo getCommitsOfRelease(List<RevCommit> commitsList, Version release, LocalDate firstDate) {
 
         List<RevCommit> matchingCommits = new ArrayList<>();
         LocalDate lastDate = release.getDate();
@@ -37,7 +37,7 @@ public class GitUtils {
 
         RevCommit lastCommit = getLastCommit(matchingCommits);
 
-        return new ReleaseCommits(release, matchingCommits, lastCommit);
+        return new ReleaseInfo(release, matchingCommits, lastCommit);
 
     }
 

@@ -3,8 +3,8 @@ package org.example.enums;
 public enum ProjectEnums {
     ZOOKEEPER,
     OPENJPA,
-    STORM,
-    //TAJO,
+    //STORM,
+    TAJO,
     AVRO,
     SYNCOPE
 }
