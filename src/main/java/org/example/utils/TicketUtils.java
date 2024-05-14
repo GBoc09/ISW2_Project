@@ -11,6 +11,7 @@ import java.util.List;
 public class TicketUtils {
     private TicketUtils() {}
     public static void printTickets(@NotNull List<Ticket> tickets) {
+        tickets.sort(Comparator.comparing(Ticket::getResolutionDate));
         for(Ticket ticket: tickets) {
             if(ticket.getInjectedRelease() != null && ticket.getOpeningRelease() != null && ticket.getFixedRelease() != null) {
                 System.out.println(ticket.getKey() + "," + ticket.getCreationDate() + "," + ticket.getResolutionDate() + "  ->  " +

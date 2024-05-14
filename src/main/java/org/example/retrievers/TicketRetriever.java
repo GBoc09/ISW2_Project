@@ -133,8 +133,8 @@ public class TicketRetriever {
             double proportionValue;
             if(inconsistentTickets.contains(ticket)) {  //If the ticket is in the inconsistent tickets list, then adjust the ticket using proportion.
                 proportionValue = incrementalProportion(ticketForProportion);
-                if (oldValue != proportionValue) System.out.println(proportionValue);
-                oldValue = proportionValue;
+                /*if (oldValue != proportionValue) System.out.println(proportionValue);
+                oldValue = proportionValue;*/
                 adjustTicket(ticket, proportionValue); //Use proportion to compute the IV
             } else if(consistentTickets.contains(ticket)) {
                 if(Proportion.isAValidTicketForProportion(ticket)) ticketForProportion.add(ticket);
@@ -143,7 +143,8 @@ public class TicketRetriever {
             if(isNotConsistent(ticket)) {
                 throw new RuntimeException();
             }
-            consistentTickets.add(ticket); /* Add the adjusted ticket to the consistent list */
+            if(!consistentTickets.contains(ticket))
+                consistentTickets.add(ticket); //Add the adjusted ticket to the consistent list
         }
     }
 
@@ -170,10 +171,8 @@ public class TicketRetriever {
         } else {
             newIndex = (int) Math.floor(fv.getIndex() - (fv.getIndex() - ov.getIndex()) * proportionValue);
         }
-        if(newIndex < 0) {
-            ticket.setInjectedRelease(versionRetriever.projVersions.get(0));
-            return;
-        }
+        if(newIndex < 0)
+            newIndex = 0;
         ticket.setInjectedRelease(versionRetriever.projVersions.get(newIndex));
     }
 

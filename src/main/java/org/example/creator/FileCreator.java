@@ -1,44 +1,28 @@
 package org.example.creator;
 
 import org.example.enums.FilenamesEnum;
+import org.example.models.ClassifierEvaluation;
 import org.example.models.JavaClass;
 import org.example.models.ReleaseInfo;
+import org.example.utils.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class FileCreator {
     private FileCreator(){}
 
-    private static String enumToDirectoryName(@NotNull FilenamesEnum fileEnum) {
-        return switch (fileEnum) {
-            case TRAINING -> "training/";
-            case TESTING -> "testing/";
-            default -> "metrics/";
-        };
-    }
-
-    private static String enumToFilename(@NotNull FilenamesEnum fileEnum, int csvIndex) {
-
-        return switch (fileEnum) {
-            case TRAINING -> "_TR" + csvIndex;
-            case TESTING -> "_TE" + csvIndex;
-            case METRICS -> "_metrics";
-            case CURRENT -> "_current_classes";
-        };
-
-    }
-
     private static @NotNull File createANewFile(String projName, FilenamesEnum fileEnum, int fileIndex, String endPath) throws IOException {
-        String enumFilename = enumToFilename(fileEnum, fileIndex);
-        String dirPath = "retrieved_data/" + projName + "/" + enumToDirectoryName(fileEnum);
+        String enumFilename = FileUtils.enumToFilename(fileEnum, fileIndex);
+        Path dirPath = Path.of("retrieved_data/", projName, FileUtils.enumToDirectoryName(fileEnum));
 
-        String pathname = dirPath + projName + enumFilename + endPath;
-        File dir = new File(dirPath);
-        File file = new File(pathname);
+        Path pathname = Path.of(dirPath.toString(), projName + enumFilename + endPath);
+        File dir = new File(dirPath.toUri());
+        File file = new File(pathname.toUri());
 
         if (!dir.exists() && !file.mkdirs()) {
             throw new RuntimeException(); //Exception: dir creation impossible
@@ -69,13 +53,57 @@ public class FileCreator {
                     "FIXED_DEFECTS," +
                     "NUMBER_OF_COMMITS," +
                     "NUMBER_OF_AUTHORS," +
-                    "IS_BUGGY,\n");
+                    "IS_BUGGY\n");
 
 
-            writeDataOnFile(rcList, fw, false);
+            writeClassesDataOnFile(rcList, fw, false);
         }
     }
-    private static void writeDataOnFile(List<ReleaseInfo> riList, FileWriter fw, boolean isArff) throws IOException {
+    public static void writeEvaluationDataOnCsv(String projName, List<ClassifierEvaluation> classifierEvaluationList) throws IOException {
+
+        File file = createANewFile(projName, FilenamesEnum.EVALUATING, 0, ".csv");
+
+        try(FileWriter fw = new FileWriter(file)) {
+
+            fw.write("DATASET," +
+                    "#TRAINING_RELEASES," +
+                    "%TRAINING_INSTANCES," +
+                    "CLASSIFIER," +
+                    "FEATURE_SELECTION," +
+                    "BALANCING," +
+                    "COST_SENSITIVE," +
+                    "PRECISION," +
+                    "RECALL," +
+                    "AUC," +
+                    "KAPPA," +
+                    "TRUE_POSITIVE," +
+                    "FALSE_POSITIVE," +
+                    "TRUE_NEGATIVE," +
+                    "FALSE_NEGATIVE\n");
+
+            for(ClassifierEvaluation classifierEvaluation: classifierEvaluationList) {
+
+                fw.write(projName + ","); //DATASET
+                fw.write(classifierEvaluation.getWalkForwardIterationIndex() + ","); //#TRAINING_RELEASES
+                fw.write(classifierEvaluation.getTrainingPercent() + ","); //%TRAINING_INSTANCES
+                fw.write(classifierEvaluation.getClassifier() + ","); //CLASSIFIER
+                fw.write(classifierEvaluation.getFeatureSelection().toString() + ","); //FEATURE_SELECTION
+                fw.write(classifierEvaluation.getSampling().toString() + ","); //BALANCING
+                fw.write(classifierEvaluation.getCostSensitiveType().toString() + ","); //COST_SENSITIVE
+                fw.write(classifierEvaluation.getPrecision() + ","); //PRECISION
+                fw.write(classifierEvaluation.getRecall() + ","); //RECALL
+                fw.write(classifierEvaluation.getAuc() + ","); //AUC
+                fw.write(classifierEvaluation.getKappa() + ","); //KAPPA
+                fw.write(classifierEvaluation.getTp() + ","); //TRUE_POSITIVE
+                fw.write(classifierEvaluation.getFp() + ","); //FALSE_POSITIVE
+                fw.write(classifierEvaluation.getTn() + ","); //TRUE_NEGATIVE
+                fw.write(classifierEvaluation.getFn() + "\n"); //FALSE_NEGATIVE
+            }
+        }
+    }
+
+
+    private static void writeClassesDataOnFile(List<ReleaseInfo> riList, FileWriter fw, boolean isArff) throws IOException {
         int count;
         for(ReleaseInfo releaseInfo: riList) {
             count = 0;
@@ -131,7 +159,9 @@ public class FileCreator {
             fw.write("@attribute IS_BUGGY {'True', 'False'}\n");
             fw.write("@data\n");
 
-            writeDataOnFile(riList, fw, true);
+            writeClassesDataOnFile(riList, fw, true);
+
+
 
         }
     }
