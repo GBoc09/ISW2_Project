@@ -25,6 +25,8 @@ public class TicketRetriever {
     List<Ticket> tickets;
     boolean coldStart = false;
 
+    /** It initializes the TicketRetriever instance by calling the init method with the provided project name.
+     * It initializes the CommitRetriever instance passing the path to the directory and the versioneRetriever instance. */
     public TicketRetriever(String projName) throws GitAPIException, IOException, URISyntaxException {
         init(projName);
         commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
