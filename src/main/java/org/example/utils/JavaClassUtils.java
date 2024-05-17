@@ -16,6 +16,10 @@ import java.util.Objects;
 
 public class JavaClassUtils {
 
+    private JavaClassUtils(){
+        throw new IllegalStateException("Utility class");
+    }
+
     public static void updateJavaBuggyness(ChangedJavaClass className, @NotNull List<ReleaseInfo> releaseInfoList, List<Version> affectedReleases) {
 
         for(ReleaseInfo rc: releaseInfoList) {

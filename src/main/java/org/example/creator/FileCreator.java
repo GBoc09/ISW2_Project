@@ -37,10 +37,6 @@ public class FileCreator {
         }
 
         return file;
-//        if (file.exists() && !file.delete()) {
-//            throw new IOException(); //Exception: file deletion impossible
-//        }
-//        return file;
     }
     public static void writeOnCsv(String projName, List<ReleaseInfo> rcList, FilenamesEnum csvEnum, int csvIndex) throws IOException {
 
