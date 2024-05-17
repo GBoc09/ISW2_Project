@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -27,11 +28,19 @@ public class FileCreator {
         if (!dir.exists() && !file.mkdirs()) {
             throw new IOException(); //Exception: dir creation impossible
         }
-
-        if (file.exists() && !file.delete()) {
-            throw new IOException(); //Exception: file deletion impossible
+        if (Files.exists(file.toPath())) {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException e) {
+                throw new IOException("File deletion failed: " + file.toPath(), e);
+            }
         }
+
         return file;
+//        if (file.exists() && !file.delete()) {
+//            throw new IOException(); //Exception: file deletion impossible
+//        }
+//        return file;
     }
     public static void writeOnCsv(String projName, List<ReleaseInfo> rcList, FilenamesEnum csvEnum, int csvIndex) throws IOException {
 

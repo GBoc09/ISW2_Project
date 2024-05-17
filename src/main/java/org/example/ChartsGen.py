@@ -248,9 +248,6 @@ def get_data(dataset, version, classifier, sampler, is_sensitive) :
         filtered_dataset = filtered_dataset[(filtered_dataset["BALANCING"] == sampler)]
     if (is_sensitive != None) :
         filtered_dataset = filtered_dataset[filtered_dataset["COST_SENSITIVE"] == is_sensitive]
-        
-    #print("Filtered Dataset Length:", len(filtered_dataset))  # Print the length of the filtered dataset
-    #print(filtered_dataset.head())  # Print the first few rows of the filtered dataset
 
     return filtered_dataset
 

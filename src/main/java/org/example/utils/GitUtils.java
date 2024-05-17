@@ -17,6 +17,9 @@ import java.util.List;
 
 
 public class GitUtils {
+    private GitUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static ReleaseInfo getCommitsOfRelease(List<RevCommit> commitsList, Version release, LocalDate firstDate) {
 

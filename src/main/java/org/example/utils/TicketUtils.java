@@ -1,11 +1,8 @@
 package org.example.utils;
 
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.example.models.Ticket;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class TicketUtils {

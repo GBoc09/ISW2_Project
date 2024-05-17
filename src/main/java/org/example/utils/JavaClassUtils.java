@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class JavaClassUtils {
-    private void JavaClassUtil() {}
 
     public static void updateJavaBuggyness(ChangedJavaClass className, @NotNull List<ReleaseInfo> releaseInfoList, List<Version> affectedReleases) {
 
