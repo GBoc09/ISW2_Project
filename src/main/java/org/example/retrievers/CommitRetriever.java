@@ -48,6 +48,17 @@ public class CommitRetriever {
     }
 
 
+    /** This class is used to manage tickets and commits.
+     * It checks if the list   of commits has already been retrieved previously. If yes, it simply returns the sored list.
+     * If the list has not yet been retrieved, it calls the log() method to obtain an iterable of RevCommit, which represents
+     * the commits in the repository.
+     * It iterates over each commit and checks if it was made before the date of the last known commit in th project
+     * If the commit meets the temporal criterion, it is added to the list of valid commit.
+     * It sorts the list of commit based on the commit date.
+     * It stores the list of commits for subsequent uses.
+     * It returns the list of commits.
+     *
+     * This method considers only the commits that were made before the last known version of the project. */
     public List<RevCommit> retrieveCommit() throws GitAPIException {
         if(commitList != null) return commitList;
 
@@ -89,6 +100,8 @@ public class CommitRetriever {
         tickets.removeIf(ticket -> ticket.getAssociatedCommits().isEmpty()); //Discard tickets that have no associated commits
     }
 
+    /** This method retrieves release commits associated with each version of the project, along with their associated
+     * Java classes and updates the commit information for those Java classes. */
     public List<ReleaseInfo> getReleaseCommits(@NotNull VersionRetriever versionRetriever, List<RevCommit> commits) throws IOException {
 
         List<ReleaseInfo> releaseCommits = new ArrayList<>();
@@ -107,6 +120,8 @@ public class CommitRetriever {
         return releaseCommits;
     }
 
+    /** This method ensures that each version  object contains a list of commits that occurred between its date and the
+     * date of the previous version, effectively associating commits with their respective versions. */
     public void associateCommitAndVersion(List<Version> projVersions) throws GitAPIException {
 
         LocalDate lowerBound = LocalDate.of(1900, 1, 1);
@@ -122,6 +137,8 @@ public class CommitRetriever {
         versionRetriever.deleteVersionWithoutCommits();
     }
 
+    /** This method scans the commit's tree for Java class file that are not test classes, retrieves the next release/version
+     * after the commit, and creates JavaClass objects for each eligible file associating them with the next release. */
     private @NotNull List<JavaClass> getClasses(@NotNull RevCommit commit) throws IOException {
 
         List<JavaClass> javaClasses = new ArrayList<>();
@@ -150,12 +167,8 @@ public class CommitRetriever {
         return javaClasses;
     }
 
-    /** This method allows us to examine the changes introduced by by a specific commit in a Git repo by printing out the
-     * information about each change.
-     * RevCommit represents the commit for which changes need to be retrieved.
-     * ObjectReader to read    Git objects from the repo.
-     * CanonicalTreeParser is an object for both old and the new trees of the commit. The old tree represents the states
-     * before the commit, while the new tree represents the  state after the commit. */
+   /** This method essentially compares the current commit with its parent to determine which Java classes have been
+    * changed and then creates ChangedJavaClass objects to represent these changes.  */
     public List<ChangedJavaClass> retrieveChanges(@NotNull RevCommit commit) throws IOException {
         List<ChangedJavaClass> changedJavaClassList = new ArrayList<>();
         try(DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {

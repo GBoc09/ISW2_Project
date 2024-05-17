@@ -66,8 +66,8 @@ public class FileCreator {
         try(FileWriter fw = new FileWriter(file)) {
 
             fw.write("DATASET," +
-                    "#TRAINING_RELEASES," +
-                    "%TRAINING_INSTANCES," +
+                    "TRAINING_RELEASES," +
+                    "TRAINING_INSTANCES," +
                     "CLASSIFIER," +
                     "FEATURE_SELECTION," +
                     "BALANCING," +
@@ -84,8 +84,8 @@ public class FileCreator {
             for(ClassifierEvaluation classifierEvaluation: classifierEvaluationList) {
 
                 fw.write(projName + ","); //DATASET
-                fw.write(classifierEvaluation.getWalkForwardIterationIndex() + ","); //#TRAINING_RELEASES
-                fw.write(classifierEvaluation.getTrainingPercent() + ","); //%TRAINING_INSTANCES
+                fw.write(classifierEvaluation.getWalkForwardIterationIndex() + ","); //TRAINING_RELEASES
+                fw.write(classifierEvaluation.getTrainingPercent() + ","); //TRAINING_INSTANCES
                 fw.write(classifierEvaluation.getClassifier() + ","); //CLASSIFIER
                 fw.write(classifierEvaluation.getFeatureSelection().toString() + ","); //FEATURE_SELECTION
                 fw.write(classifierEvaluation.getSampling().toString() + ","); //BALANCING
