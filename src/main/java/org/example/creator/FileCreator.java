@@ -64,6 +64,7 @@ public class FileCreator {
             writeClassesDataOnFile(rcList, fw, false);
         }
     }
+
     public static void writeEvaluationDataOnCsv(String projName, List<ClassifierEvaluation> classifierEvaluationList) throws IOException {
 
         File file = createANewFile(projName, FilenamesEnum.EVALUATING, 0, ".csv");

@@ -57,6 +57,9 @@ public class WekaInfoRetriever {
         return classifierEvaluationList;
     }
 
+    /** This method iterates through all possible combinations of classifiers, feature selection modes, sampling modes and
+     * cost-sensitive modes. For each combination, it calls the useClassifier method to evaluate the classifier and adds
+     * the result to the classifiersListMap map. */
     private void computeIteration(String projName, Map<String, List<ClassifierEvaluation>> classifiersListMap, int i) throws Exception {
         for(ClassifierEnum classifierName: ClassifierEnum.values()) { //For each classifier
             for (FeatureSelectionEnum featureSelectionEnum : FeatureSelectionEnum.values()) {   //Iterate on all feature selection mode
@@ -92,7 +95,8 @@ public class WekaInfoRetriever {
                 //FEATURE SELECTION WITH BEST FIRST FORWARD TECNIQUE
                 AttributeSelection filter = getBestFirstAttributeSelection(training, "-D 1 -N 5");
 
-                classifier = getFilteredClassifier(classifier, filter);
+                classifier = getFilteredClassifier(classifier, filter); /* This line of code is responsible for creating
+                a new classifier that also incorporates a specific filter, which will be used for the training model. */
             }
             case BEST_FIRST_BACKWARD -> {
                 //FEATURE SELECTION WITH BEST FIRST BACKWARD TECNIQUE
