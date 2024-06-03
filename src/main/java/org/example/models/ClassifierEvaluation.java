@@ -3,7 +3,6 @@ package org.example.models;
 import org.example.enums.CostSensitiveEnum;
 import org.example.enums.FeatureSelectionEnum;
 import org.example.enums.SamplingEnum;
-import weka.filters.Filter;
 
 public class ClassifierEvaluation {
     private String projName;

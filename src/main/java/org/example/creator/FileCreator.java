@@ -1,9 +1,11 @@
 package org.example.creator;
 
-import org.example.enums.FilenamesEnum;
+import org.example.enums.*;
 import org.example.models.ClassifierEvaluation;
+import org.example.exceptions.ImpossibleDirectoryCreationException;
 import org.example.models.JavaClass;
 import org.example.models.ReleaseInfo;
+import org.example.utils.AcumeUtils;
 import org.example.utils.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,8 +16,63 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static java.nio.file.Files.delete;
+
 public class FileCreator {
     private FileCreator(){}
+
+    public static void writeCsvForAcume(String projectName, ClassifierEnum classifierEnum, FeatureSelectionEnum featureSelectionEnum, SamplingEnum samplingEnum, CostSensitiveEnum costSensitiveEnum, Integer index, List<AcumeUtils> acumeUtils) throws IOException, ImpossibleDirectoryCreationException {
+
+        String fileName = projectName.toUpperCase() + "_" + classifierEnum.toString().toUpperCase() + "_" + featureSelectionEnum.toString().toUpperCase() + "_" + samplingEnum.toString().toUpperCase() + "_" + costSensitiveEnum.toString().toUpperCase() + "_" + index.toString();
+        File file = createANewFileAcume(projectName, fileName, FilenamesEnum.ACUME, index);
+
+        writeOnCsvAcume(file, acumeUtils);
+
+    }
+
+    private static @NotNull File createANewFileAcume(String projectName, String fileName, FilenamesEnum fileEnum, int fileIndex) throws IOException, ImpossibleDirectoryCreationException {
+        String enumFilename = FileUtils.enumToFilename(fileEnum, fileIndex);
+        Path dirPath = Path.of("retrieved_data/" + projectName + "/acume/");
+        return getFile(fileName, ".csv", enumFilename, dirPath, true);
+    }
+
+    private static @NotNull File getFile(String projName, String endPath, String enumFilename, Path dirPath, boolean acume) throws IOException, ImpossibleDirectoryCreationException {
+
+        Path pathname;
+
+        if(!acume) {
+            pathname = Path.of(dirPath.toString(), projName + enumFilename + endPath);
+        }else{
+            projName = projName + ".csv";
+            pathname = Path.of(dirPath.toString(), projName);
+        }
+
+        return getFile(dirPath, pathname);
+    }
+
+    private static void writeOnCsvAcume(File file, List<AcumeUtils> acumeUtilsList) throws IOException {
+
+        try(FileWriter fileWriter = new FileWriter(file)) {
+
+            fileWriter.write("ID," + "Size," + "Predicted," + "Actual");
+
+            fileWriter.write("\n");
+
+            for(AcumeUtils acumeUtils : acumeUtilsList) {
+
+                fileWriter.write(acumeUtils.getIndex() + ",");                          //INDEX OF CLASS
+                fileWriter.write(acumeUtils.getSize() + ",");                           //SIZE OF CLASS
+                fileWriter.write(acumeUtils.getProbabilityOfBuggyness() + ",");         //PROBABILITY OF BUGGY
+                fileWriter.write(acumeUtils.isBuggy());
+
+                fileWriter.write("\n");
+
+            }
+
+        }
+
+    }
+
 
     private static @NotNull File createANewFile(String projName, FilenamesEnum fileEnum, int fileIndex, String endPath) throws IOException {
         String enumFilename = FileUtils.enumToFilename(fileEnum, fileIndex);
@@ -30,7 +87,7 @@ public class FileCreator {
         }
         if (Files.exists(file.toPath())) {
             try {
-                Files.delete(file.toPath());
+                delete(file.toPath());
             } catch (IOException e) {
                 throw new IOException("File deletion failed: " + file.toPath(), e);
             }
@@ -38,6 +95,29 @@ public class FileCreator {
 
         return file;
     }
+    private static @NotNull File getFile(Path dirPath, Path pathname) throws ImpossibleDirectoryCreationException, IOException{
+
+        File dir = new File(dirPath.toUri());
+        File file = new File(pathname.toUri());
+
+        if(!dir.exists() && !file.mkdirs()) {
+            throw new ImpossibleDirectoryCreationException();               //Exception: dir creation impossible
+        }
+
+        deleteFile(file);
+
+        return file;
+
+    }
+
+    private static void deleteFile(File file) throws IOException {
+
+        if(file.exists())
+            delete(file.toPath());
+
+    }
+
+
     public static void writeOnCsv(String projName, List<ReleaseInfo> rcList, FilenamesEnum csvEnum, int csvIndex) throws IOException {
 
         File file = createANewFile(projName, csvEnum, csvIndex, ".csv");

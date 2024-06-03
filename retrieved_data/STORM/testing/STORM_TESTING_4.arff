@@ -1,0 +1,37 @@
+@relation STORM_TESTING_4.arff
+@attribute SIZE numeric
+@attribute LOC_ADDED numeric
+@attribute MAX_LOC_ADDED numeric
+@attribute AVG_LOC_ADDED numeric
+@attribute LOC_DELETED numeric
+@attribute MAX_LOC_DELETED numeric
+@attribute AVG_LOC_DELETED numeric
+@attribute CHURN numeric
+@attribute MAX_CHURN numeric
+@attribute AVG_CHURN numeric
+@attribute FIXED_DEFECTS numeric
+@attribute NUMBER_OF_COMMITS numeric
+@attribute NUMBER_OF_AUTHORS numeric
+@attribute IS_BUGGY {'True', 'False'}
+@data
+233,248,206,82.66666666666667,15,14,82.66666666666667,233,206,77.66666666666667,0,3,1,False
+557,780,510,86.66666666666667,222,162,86.66666666666667,770,510,85.55555555555556,0,9,1,False
+22,22,22,22.0,0,0,22.0,22,22,22.0,0,1,1,False
+39,39,39,39.0,0,0,39.0,39,39,39.0,0,1,1,False
+39,39,39,39.0,0,0,39.0,39,39,39.0,0,1,1,False
+24,24,24,24.0,0,0,24.0,24,24,24.0,0,1,1,False
+45,45,45,45.0,0,0,45.0,45,45,45.0,0,1,1,False
+77,77,77,77.0,0,0,77.0,77,77,77.0,0,1,1,False
+77,77,77,77.0,0,0,77.0,77,77,77.0,0,1,1,False
+54,54,54,54.0,0,0,54.0,54,54,54.0,0,1,1,False
+90,90,79,45.0,0,0,45.0,90,79,45.0,0,2,1,False
+58,58,58,58.0,0,0,58.0,58,58,58.0,0,1,1,False
+24,24,24,24.0,0,0,24.0,24,24,24.0,0,1,1,False
+64,64,64,64.0,0,0,64.0,64,64,64.0,0,1,1,False
+214,223,182,55.75,9,4,55.75,214,182,53.5,0,4,1,False
+19,19,19,19.0,0,0,19.0,19,19,19.0,0,1,1,False
+35,35,35,35.0,0,0,35.0,35,35,35.0,0,1,1,False
+157,157,157,157.0,0,0,157.0,157,157,157.0,0,1,1,False
+55,55,55,55.0,0,0,55.0,55,55,55.0,0,1,1,False
+26,26,26,26.0,0,0,26.0,26,26,26.0,0,1,1,False
+54,54,54,54.0,0,0,54.0,54,54,54.0,0,1,1,False

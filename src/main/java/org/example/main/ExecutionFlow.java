@@ -55,7 +55,7 @@ public class ExecutionFlow {
             //Selection of the tickets opened until the i-th release.
             List<Ticket> ticketsUntilRelease = TicketUtils.getTicketsUntilRelease(tickets, i);
 
-            //Non viene aggiornata la buggyness del testing set.
+            // Testing set buggyness is not updated.
             MetricsRetriever.computeBuggyness(releaseInfoListHalved.subList(0, i), ticketsUntilRelease, commitRetriever, versionRetriever);
 
             FileCreator.writeOnArff(projName, releaseInfoListHalved.subList(0, i), FilenamesEnum.TRAINING, i);

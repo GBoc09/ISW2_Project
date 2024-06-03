@@ -1,6 +1,7 @@
 package org.example.retrievers;
 
 import org.example.enums.*;
+import org.example.utils.AcumeUtils;
 import org.example.models.ClassifierEvaluation;
 import org.jetbrains.annotations.NotNull;
 import org.example.utils.FileUtils;
@@ -25,6 +26,8 @@ import weka.filters.supervised.instance.SpreadSubsample;
 import java.nio.file.Path;
 import java.util.*;
 
+import static org.example.creator.FileCreator.writeCsvForAcume;
+
 public class WekaInfoRetriever {
 
     private final String projName;
@@ -34,7 +37,11 @@ public class WekaInfoRetriever {
         this.projName = projName;
         this.numIter = numIter;
     }
-
+    private void putValues(Map<String, List<ClassifierEvaluation>> classifiersListMap){
+        for(ClassifierEnum classifierName: ClassifierEnum.values()) {
+            classifiersListMap.put(classifierName.name(), new ArrayList<>());
+        }
+    }
     public List<ClassifierEvaluation> retrieveClassifiersEvaluation(String projName) throws Exception {
 
         Map<String, List<ClassifierEvaluation>> classifiersListMap = new HashMap<>();
@@ -181,8 +188,42 @@ public class WekaInfoRetriever {
         simpleRandomForest.setFp(eval.numFalsePositives(0));
         simpleRandomForest.setTn(eval.numTrueNegatives(0));
         simpleRandomForest.setFn(eval.numFalseNegatives(0));
+
+        String size = "SIZE";
+        String isBuggy = "IS_BUGGY";
+        List<AcumeUtils> acumeUtilsList = new ArrayList<>();
+
+        int sizeIndex = testing.attribute(size).index();
+        int isBuggyIndex = testing.attribute(isBuggy).index();
+
+        int trueClassifierIndex = testing.classAttribute().indexOfValue("True");
+
+        if(trueClassifierIndex != -1){
+            for(int i = 0; i < testing.numInstances(); i++){
+                int sizeValue = (int) testing.instance(i).value(sizeIndex);
+                int valueIndex = (int) testing.instance(i).value(isBuggyIndex);
+                String buggyness =  testing.attribute(isBuggyIndex).value(valueIndex);
+                String buggy;
+                buggy = writeBuggy(buggyness);
+                double[] distribution = classifier.distributionForInstance(testing.instance(i));
+                AcumeUtils acumeUtils = new AcumeUtils(i, sizeValue, distribution[trueClassifierIndex], buggy);
+                acumeUtilsList.add(acumeUtils);
+            }
+        }
+        writeCsvForAcume(projName, classifierName, featureSelection, sampling, costSensitive, index, acumeUtilsList);
+
         return simpleRandomForest;
     }
+    private String writeBuggy(String buggyness) {
+
+        if(buggyness.equals("True")){
+            return  "YES";
+        }else{
+            return  "NO";
+        }
+
+    }
+
 
     private static AttributeSelection getBestFirstAttributeSelection(Instances training, String quotedOptionString) throws Exception {
         AttributeSelection filter = new AttributeSelection();
