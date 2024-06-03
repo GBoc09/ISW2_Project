@@ -37,11 +37,6 @@ public class WekaInfoRetriever {
         this.projName = projName;
         this.numIter = numIter;
     }
-    private void putValues(Map<String, List<ClassifierEvaluation>> classifiersListMap){
-        for(ClassifierEnum classifierName: ClassifierEnum.values()) {
-            classifiersListMap.put(classifierName.name(), new ArrayList<>());
-        }
-    }
     public List<ClassifierEvaluation> retrieveClassifiersEvaluation(String projName) throws Exception {
 
         Map<String, List<ClassifierEvaluation>> classifiersListMap = new HashMap<>();
