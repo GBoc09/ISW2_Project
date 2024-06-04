@@ -17,7 +17,7 @@ public class FileUtils {
             case TESTING -> "_TESTING_" + index;
             case METRICS -> "_metrics";
             case ACUME ->  "_ACUME" + index;
-            case EVALUATING -> "_classifiers_report_";
+            case EVALUATING -> "_classifiers_report";
         };
 
     }
