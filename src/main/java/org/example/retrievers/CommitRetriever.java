@@ -57,7 +57,6 @@ public class CommitRetriever {
      * It sorts the list of commit based on the commit date.
      * It stores the list of commits for subsequent uses.
      * It returns the list of commits.
-     *
      * This method considers only the commits that were made before the last known version of the project. */
     public List<RevCommit> retrieveCommit() throws GitAPIException {
         if(commitList != null) return commitList;

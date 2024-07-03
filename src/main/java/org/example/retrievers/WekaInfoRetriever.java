@@ -37,6 +37,7 @@ public class WekaInfoRetriever {
         this.projName = projName;
         this.numIter = numIter;
     }
+
     public List<ClassifierEvaluation> retrieveClassifiersEvaluation(String projName) throws Exception {
 
         Map<String, List<ClassifierEvaluation>> classifiersListMap = new HashMap<>();

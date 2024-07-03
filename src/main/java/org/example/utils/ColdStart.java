@@ -13,7 +13,7 @@ import java.util.List;
 public class ColdStart {
     private ColdStart() {}
 
-    /**When the number of valid tickets used for compute the proportion value are less than 5, use the tickets of other
+    /** When the number of valid tickets used for compute the proportion value are less than 5, use the tickets of other
      * project.*/
     public static List<Ticket> getTicketForColdStart(ProjectEnums project) throws GitAPIException, IOException, URISyntaxException {
         TicketRetriever retriever = new TicketRetriever(project.toString(), true);

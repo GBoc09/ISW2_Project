@@ -32,7 +32,7 @@ public class FileCreator {
 
     private static @NotNull File createANewFileAcume(String projectName, String fileName, FilenamesEnum fileEnum, int fileIndex) throws IOException, ImpossibleDirectoryCreationException {
         String enumFilename = FileUtils.enumToFilename(fileEnum, fileIndex);
-        Path dirPath = Path.of("retrieved_data/" + projectName + "/acume/");
+        Path dirPath = Path.of("retrieved_data/" + projectName + "/acumeFile/");
         return getFile(fileName, ".csv", enumFilename, dirPath, true);
     }
 
