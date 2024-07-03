@@ -80,7 +80,7 @@ class ProcessedDataEntity:
     """
     args = None
 
-    def __init__(self, filename="", total_nr_no=0, IFA=0, poptStepData={}, PoptXData={}, NPofBData={}, NpoptData={},precision_0_5=0.0, recall=0.0,
+    def __init__(self, filename="", classifier="", feature_selection="", balancing="", cost_sensitive="", total_nr_no=0, IFA=0, poptStepData={}, PoptXData={}, NPofBData={}, NpoptData={},precision_0_5=0.0, recall=0.0,
                  f1_score=0.0,
                  MAP=0.0, auc=0,
                  g_measure=0, mcc=0, pop=0, average_pop=0, average_pofb=0 ,average_npofb=0, average_npopt=0):
@@ -98,6 +98,11 @@ class ProcessedDataEntity:
         :param mcc:
         """
         self.filename = filename
+        self.classifier = classifier
+        self.feature_selection = feature_selection
+        self.balancing = balancing
+        self.cost_sensitive = cost_sensitive
+
         self.total_nr_no = total_nr_no
         self.IFA = IFA
         for key, value in poptStepData.items():
@@ -124,6 +129,109 @@ class ProcessedDataEntity:
         self.average_pofb = average_pofb
         self.average_npofb = average_npofb
         self.average_npopt = average_npopt
+
+
+        self._parse_filename()
+
+    def _parse_filename(self):
+        parts = self.filename.split('_')
+        if len(parts) == 10:
+            print(f"if parts = 10")
+            print(f"length: {len(parts)}")
+            self.filename = parts[0]
+            self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
+            print(f"classifier: {parts[1]}")
+            self.feature_selection = parts[3] + '_' + parts[4] + '_' + parts[5]
+            print(f"feature_selection: {parts[3]}")
+            self.balancing = parts[6]
+            print(f"balancing: {parts[6]}")
+            self.cost_sensitive = parts[7] + '_' + parts[8]
+            print(f"cost_sensitive: {parts[7]}")
+
+        elif len(parts) == 9:
+            print(f"if parts = 9\nlength: {len(parts)}")
+            self.filename = parts[0]
+            if (parts[1] == 'IBK'):
+                self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
+                self.feature_selection = parts[2] + '_' + parts[3] + '_' + parts[4]
+                self.balancing = parts[5]
+                self.cost_sensitive = parts[6] + '_' + parts[7]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[2]}")
+                print(f"balancing: {parts[5]}")
+                print(f"cost_sensitive: {parts[6]}")
+            else:
+                self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
+                self.feature_selection = parts[3] + '_' + parts[4] + '_' + parts[5]
+                self.balancing = parts[6]
+                self.cost_sensitive = parts[7]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[2]}")
+                print(f"balancing: {parts[5]}")
+                print(f"cost_sensitive: {parts[6]}")
+
+        elif len(parts) == 8:
+            print(f"if parts = 8\nlength: {len(parts)}")
+            self.filename = parts[0]
+            if (parts[1] == 'IBK'):
+                self.classifier = parts[1].replace('IBK', 'IBK')
+                self.feature_selection = parts[2] + '_' + parts[3] + '_' + parts[4]
+                self.balancing = parts[5]
+                self.cost_sensitive = parts[6]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[2]}")
+                print(f"balancing: {parts[5]}")
+                print(f"cost_sensitive: {parts[6]}")
+            else:
+                self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
+                self.feature_selection = parts[3]
+                self.balancing = parts[4]
+                self.cost_sensitive = parts[5] + '_' + parts[6]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[3]}")
+                print(f"balancing: {parts[4]}")
+                print(f"cost_sensitive: {parts[5]}")
+
+        elif len(parts) == 7:
+            print(f"if parts == 7\nlength: {len(parts)}")
+            self.filename = parts[0]
+            if (parts[1] == 'IBK'):
+                self.classifier = parts[1]
+                self.feature_selection = parts[2]
+                self.balancing = parts[3]
+                self.cost_sensitive = parts[4] + '_' + parts[5]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[2]}")
+                print(f"balancing: {parts[3]}")
+                print(f"cost_sensitive: {parts[4]}")
+            else:
+                self.classifier = parts[1] + '_' + parts[2]
+                self.feature_selection = parts[3]
+                self.balancing = parts[4]
+                self.cost_sensitive = parts[5]
+
+                print(f"classifier: {parts[1]}")
+                print(f"feature_selection: {parts[2]}")
+                print(f"balancing: {parts[4]}")
+                print(f"cost_sensitive: {parts[5]}")
+
+        elif len(parts) == 6:
+            self.filename = parts[0] #filename
+            self.classifier = parts[1] #classifier = IBK
+            self.feature_selection = parts[2] #feature_selection = NONE
+            self.balancing = parts[3] #balancing = NONE,SMOTE,OVER
+            self.cost_sensitive = parts[4] #cost_sensitive = NONE
+
+            print(f"if parts >= 6\nlength: {len(parts)}")
+            print(f"classifier: {parts[1]}")
+            print(f"feature_selection: {parts[2]}")
+            print(f"balancing: {parts[3]}")
+            print(f"cost_sensitive: {parts[4]}")
 
     def normalize(self):
         """Function that for each attribute in the original field does the normalization according to optimal/worst
@@ -253,7 +361,7 @@ class ProcessedDataEntity:
         """
         args = self.args if self.args else arg_mapp
 
-        output = f"{self.filename};"
+        output = f"{self.filename}; {self.classifier}; {self.feature_selection}; {self.balancing};{self.cost_sensitive};"
 
         for arg in args:
             if arg == "poptX":
@@ -276,7 +384,7 @@ class ProcessedDataEntity:
         args = ProcessedDataEntity.args if ProcessedDataEntity.args else arg_mapp
         appendage = "norm" if normalized else ""
         start_appendage = "N" if n else ""
-        output = "Filename;"
+        output = "Filename;Classifier;FeatureSelection;Balancing;CostSensitive;"
 
         for arg in args:
             if arg == "poptX":

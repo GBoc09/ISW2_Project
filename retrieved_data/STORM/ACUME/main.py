@@ -39,6 +39,7 @@ for file_num, filename in enumerate(onlyfiles):
     File reading and initial transformation
     """
 
+
     for row_index, row in enumerate(file):
         if row_index == 0:
             continue
