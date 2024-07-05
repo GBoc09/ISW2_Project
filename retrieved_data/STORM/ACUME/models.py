@@ -136,20 +136,19 @@ class ProcessedDataEntity:
     def _parse_filename(self):
         parts = self.filename.split('_')
         if len(parts) == 10:
-            print(f"if parts = 10")
-            print(f"length: {len(parts)}")
+
             self.filename = parts[0]
             self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
-            print(f"classifier: {parts[1]}")
+
             self.feature_selection = parts[3] + '_' + parts[4] + '_' + parts[5]
-            print(f"feature_selection: {parts[3]}")
+
             self.balancing = parts[6]
-            print(f"balancing: {parts[6]}")
+
             self.cost_sensitive = parts[7] + '_' + parts[8]
-            print(f"cost_sensitive: {parts[7]}")
+
 
         elif len(parts) == 9:
-            print(f"if parts = 9\nlength: {len(parts)}")
+
             self.filename = parts[0]
             if (parts[1] == 'IBK'):
                 self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
@@ -157,23 +156,17 @@ class ProcessedDataEntity:
                 self.balancing = parts[5]
                 self.cost_sensitive = parts[6] + '_' + parts[7]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[2]}")
-                print(f"balancing: {parts[5]}")
-                print(f"cost_sensitive: {parts[6]}")
+
             else:
                 self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
                 self.feature_selection = parts[3] + '_' + parts[4] + '_' + parts[5]
                 self.balancing = parts[6]
                 self.cost_sensitive = parts[7]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[2]}")
-                print(f"balancing: {parts[5]}")
-                print(f"cost_sensitive: {parts[6]}")
+
 
         elif len(parts) == 8:
-            print(f"if parts = 8\nlength: {len(parts)}")
+
             self.filename = parts[0]
             if (parts[1] == 'IBK'):
                 self.classifier = parts[1].replace('IBK', 'IBK')
@@ -181,23 +174,16 @@ class ProcessedDataEntity:
                 self.balancing = parts[5]
                 self.cost_sensitive = parts[6]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[2]}")
-                print(f"balancing: {parts[5]}")
-                print(f"cost_sensitive: {parts[6]}")
             else:
                 self.classifier = parts[1].replace('RANDOM', 'RANDOM_FOREST').replace('NAIVE', 'NAIVE_BAYES').replace('IBK', 'IBK')
                 self.feature_selection = parts[3]
                 self.balancing = parts[4]
                 self.cost_sensitive = parts[5] + '_' + parts[6]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[3]}")
-                print(f"balancing: {parts[4]}")
-                print(f"cost_sensitive: {parts[5]}")
+
 
         elif len(parts) == 7:
-            print(f"if parts == 7\nlength: {len(parts)}")
+
             self.filename = parts[0]
             if (parts[1] == 'IBK'):
                 self.classifier = parts[1]
@@ -205,20 +191,13 @@ class ProcessedDataEntity:
                 self.balancing = parts[3]
                 self.cost_sensitive = parts[4] + '_' + parts[5]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[2]}")
-                print(f"balancing: {parts[3]}")
-                print(f"cost_sensitive: {parts[4]}")
+
             else:
                 self.classifier = parts[1] + '_' + parts[2]
                 self.feature_selection = parts[3]
                 self.balancing = parts[4]
                 self.cost_sensitive = parts[5]
 
-                print(f"classifier: {parts[1]}")
-                print(f"feature_selection: {parts[2]}")
-                print(f"balancing: {parts[4]}")
-                print(f"cost_sensitive: {parts[5]}")
 
         elif len(parts) == 6:
             self.filename = parts[0] #filename
@@ -227,11 +206,7 @@ class ProcessedDataEntity:
             self.balancing = parts[3] #balancing = NONE,SMOTE,OVER
             self.cost_sensitive = parts[4] #cost_sensitive = NONE
 
-            print(f"if parts >= 6\nlength: {len(parts)}")
-            print(f"classifier: {parts[1]}")
-            print(f"feature_selection: {parts[2]}")
-            print(f"balancing: {parts[3]}")
-            print(f"cost_sensitive: {parts[4]}")
+
 
     def normalize(self):
         """Function that for each attribute in the original field does the normalization according to optimal/worst
