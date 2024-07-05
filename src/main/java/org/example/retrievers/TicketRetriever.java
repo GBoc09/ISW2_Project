@@ -102,7 +102,6 @@ public class TicketRetriever {
             commitRetriever.associateTicketAndCommit(consistentTickets);
         } /* Adjust the inconsistency tickets using proportion for missing IV, when you are not using cold start */
         discardInvalidTicket(consistentTickets); /* Discard the tickets that aren't consistent yet.*/
-        System.out.println("Retrieve Bug tickets, consistent ticket with IV: "+ consistentTickets);
         return consistentTickets;
     }
 
@@ -146,7 +145,6 @@ public class TicketRetriever {
      * Consistent ticket after adjusting them */
     private static double incrementalProportion(@NotNull List<Ticket> consistentTickets) throws GitAPIException, IOException, URISyntaxException {
         double proportionValue;
-        System.out.println(consistentTickets.size());
         if(consistentTickets.size() >= 7) {
             proportionValue = Proportion.computeProportionValue(consistentTickets);
         } else {
