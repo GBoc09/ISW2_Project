@@ -38,4 +38,5 @@ public class JavaClass {
     public Metrics getMetrics() {
         return metrics;
     }
+    public Version getRelease(){return release;}
 }
