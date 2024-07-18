@@ -25,8 +25,7 @@ public class TicketRetriever {
     List<Ticket> tickets;
     boolean coldStart = false;
 
-    /** It initializes the TicketRetriever instance by calling the init method with the provided project name.
-     * It initializes the CommitRetriever instance passing the path to the directory and the versionRetriever instance. */
+
     public TicketRetriever(String projName) throws GitAPIException, IOException, URISyntaxException {
         init(projName);
         commitRetriever = new CommitRetriever("/home/giulia/Documenti/GitHub/" + projName.toLowerCase(), versionRetriever);
@@ -141,8 +140,7 @@ public class TicketRetriever {
                 consistentTickets.add(ticket); //Add the adjusted ticket to the consistent list
         }
     }
-    /** Consistent ticket before adjusting them 7 ---> valutare come fissare la soglia di incrementalProportion
-     * Consistent ticket after adjusting them */
+    /** Consistent ticket before adjusting them 7 */
     private static double incrementalProportion(@NotNull List<Ticket> consistentTickets) throws GitAPIException, IOException, URISyntaxException {
         double proportionValue;
         if(consistentTickets.size() >= 7) {

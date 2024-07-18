@@ -19,34 +19,24 @@ public class ReleaseInfo {
         this.javaClasses = null;
     }
 
-    /**
-     * @return the release
-     */
+
     public Version getRelease() {
         return release;
     }
-    /**
-     * @return the commits
-     */
+
     public List<RevCommit> getCommits() {
         return commits;
     }
-    /**
-     * @return the lastCommit
-     */
+
     public RevCommit getLastCommit() {
         return lastCommit;
     }
-    /**
-     * @return the javaClasses
-     */
+
     public List<JavaClass> getJavaClasses() {
         return javaClasses;
     }
 
-    /**
-     * @param javaClasses the javaClasses to set
-     */
+
     public void setJavaClasses(List<JavaClass> javaClasses) {
         this.javaClasses = javaClasses;
     }

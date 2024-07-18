@@ -34,9 +34,7 @@ public class CommitRetriever {
         this.git = new Git(repository);
         this.versionRetriever = versionRetriever;
     }
-    /** to filter out commits that are associated with a specific ticket
-     * It's iterates through a list of RevCommit objects and checks if the full message of each commit contain a certain
-     * key related to a ticket. To check if the message contains a specific key it appears to be using a regular expression */
+    /** to filter out commits that are associated with a specific ticket */
     private @NotNull List<RevCommit> retrieveAssociatedCommits(@NotNull List<RevCommit> commits, Ticket ticket) {
         List<RevCommit> associatedCommit = new ArrayList<>();
         for(RevCommit commit: commits) {
@@ -49,15 +47,7 @@ public class CommitRetriever {
 
 
     /** This class is used to manage tickets and commits.
-     * It checks if the list   of commits has already been retrieved previously. If yes, it simply returns the sored list.
-     * If the list has not yet been retrieved, it calls the log() method to obtain an iterable of RevCommit, which represents
-     * the commits in the repository.
-     * It iterates over each commit and checks if it was made before the date of the last known commit in th project
-     * If the commit meets the temporal criterion, it is added to the list of valid commit.
-     * It sorts the list of commit based on the commit date.
-     * It stores the list of commits for subsequent uses.
-     * It returns the list of commits.
-     * This method considers only the commits that were made before the last known version of the project. */
+    */
     public List<RevCommit> retrieveCommit() throws GitAPIException {
         if(commitList != null) return commitList;
 

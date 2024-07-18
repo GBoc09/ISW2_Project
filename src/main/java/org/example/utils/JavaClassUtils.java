@@ -32,9 +32,6 @@ public class JavaClassUtils {
 
     /**
      * This method find the modified class into the class of the release, set its buggyness to true and associate the commit to the class.
-     *
-     * @param className   the name of the searched class
-     * @param javaClasses the list of java classes in the release
     */
     private static void findClassAndSetBuggyness(ChangedJavaClass className, @NotNull List<JavaClass> javaClasses) {
         for(JavaClass javaClass: javaClasses) {

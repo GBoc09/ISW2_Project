@@ -17,17 +17,6 @@ public class ExecutionFlow {
     private static final Logger logger = Logger.getLogger(ExecutionFlow.class.getName());
     private ExecutionFlow() {}
 
-   /** system for collecting and analyzing data related to software projects.
-    *     It initializes retrievers for tickets, commits, and versions.
-    *     Retrieves tickets associated with the specified project.
-    *     Retrieves information about commits related to releases.
-    *     Computes metrics based on the release information and tickets.
-    *     Writes the computed metrics to a CSV file.
-    *     Performs a "walk forward" process, where it iterates over release information.
-    *         It discards half of the releases.
-    *         For each iteration, it computes bugginess, writes training and testing data to ARFF files.
-    *     Initiates Weka evaluation by retrieving classifier evaluations.
-    *     Writes evaluation data to a CSV file. */
 
     public static void collectData(String projName) throws Exception{
         TicketRetriever ticketRetriever = new TicketRetriever(projName);
@@ -75,10 +64,6 @@ public class ExecutionFlow {
 
     /** This method sorts the lists of the ReleaseInfo objects based on their associated release indices and then discard
      * half of the releases, keeping the first half.
-     * It sorts the releaseInfoList based on the indices of the releases they contain
-     * It returns a sublist of the first half of the sorted releaseInfoList, including the middle element if the size of
-     * the list is odd.
-     * The Comparator used for sorting relies on comparing the indices of the releases.
      */
     private static @NotNull List<ReleaseInfo> discardHalfReleases(@NotNull List<ReleaseInfo> releaseInfoList) {
         int n = releaseInfoList.size();

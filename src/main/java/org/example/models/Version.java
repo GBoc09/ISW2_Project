@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/** With this class our intent is to create the object VERSION, whit its attributes
+/** With this class our intent is to create the object VERSION, with its attributes
  * Each version has an ID, a name and a creation date. */
 public class Version {
     String id;
