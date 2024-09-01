@@ -1,6 +1,6 @@
 # ISW2_Project
 
-Author: Giulia Boccuccia
-Course: Ingegneria del Software 2
+# Progetto di Ingegneria del Software 2
+Released by Giulia Boccuccia 
 
-GOAL 
+
